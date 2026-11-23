@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Garantias Beux – vínculo de notas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<style>
+:root{
+  --bg:#F5F7F9; --surface:#FFFFFF; --surface-2:#ECF0F4; --ink:#1C2631; --muted:#5A6676; --line:#D6DCE3;
+  --accent:#B87A06; --accent-fill:#F2B632; --accent-ink:#2A1E00;
+  --ok:#1F6B4A; --ok-bg:#E2F2EA; --wait:#2A5F98; --wait-bg:#E3EDF8; --warn:#9A4E12; --warn-bg:#FBEBDD; --bad:#9C2F2F; --bad-bg:#F8E3E3; --gray-bg:#EEF0F3;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11171D; --surface:#19212A; --surface-2:#222C37; --ink:#E4E9EF; --muted:#98A5B3; --line:#2E3A47;
+    --accent:#E8AE3A; --accent-fill:#E8AE3A; --accent-ink:#1E1500;
+    --ok:#5BC08F; --ok-bg:#16342A; --wait:#78A9E2; --wait-bg:#172A40; --warn:#E6A064; --warn-bg:#3A2716; --bad:#E57B7B; --bad-bg:#3B1C1C; --gray-bg:#232C36;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11171D; --surface:#19212A; --surface-2:#222C37; --ink:#E4E9EF; --muted:#98A5B3; --line:#2E3A47;
+  --accent:#E8AE3A; --accent-fill:#E8AE3A; --accent-ink:#1E1500;
+  --ok:#5BC08F; --ok-bg:#16342A; --wait:#78A9E2; --wait-bg:#172A40; --warn:#E6A064; --warn-bg:#3A2716; --bad:#E57B7B; --bad-bg:#3B1C1C; --gray-bg:#232C36;
+  color-scheme: dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 20px 60px}
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+h1{font-family:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;font-weight:600;font-size:30px;line-height:1.1;margin:0;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:6px 0 0;max-width:62ch}
+button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px}
+button:hover{border-color:var(--muted)}
+button:focus-visible,input:focus-visible,label.drop:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.primary{background:var(--accent-fill);color:var(--accent-ink);border-color:transparent;font-weight:600}
+.primary:hover{filter:brightness(.96);border-color:transparent}
+label.drop{display:flex;align-items:center;gap:16px;border:1.5px dashed var(--line);border-radius:10px;background:var(--surface);padding:16px 18px;cursor:pointer;transition:border-color .15s,background .15s}
+label.drop.over{border-color:var(--accent);background:var(--surface-2)}
+label.drop input{position:absolute;width:1px;height:1px;opacity:0}
+.drop .glyph{flex:none;width:40px;height:40px;border-radius:8px;background:var(--surface-2);display:grid;place-items:center;color:var(--accent)}
+.drop strong{display:block}
+.drop span.hint{color:var(--muted);font-size:13.5px}
+.status{margin:10px 2px 0;font-size:14px;color:var(--muted);min-height:1.5em}
+.status.ok{color:var(--ok)} .status.err{color:var(--bad)}
+.mine{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px}
+.mine h2{margin:0 0 4px;font-size:17px;font-weight:600}
+.mine p{margin:4px 0;color:var(--muted)}
+.mine b{color:var(--ink)}
+[hidden]{display:none!important}
+.userbar{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap;font-size:13.5px;color:var(--muted);margin-bottom:10px}
+.userbar button{padding:4px 10px;font-size:13.5px}
+.login{max-width:380px;margin:60px auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:26px 24px}
+.login h1{font-size:26px;margin-bottom:6px}
+.login label{display:block;font-size:13.5px;font-weight:500;margin:14px 0 4px}
+.login input{width:100%;font:inherit;padding:9px 11px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.login .primary{width:100%;margin-top:18px;padding:10px}
+.login .status{text-align:center}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:26px 0 14px;border-bottom:1px solid var(--line)}
+nav.tabs button{border:none;border-bottom:3px solid transparent;border-radius:0;background:none;padding:9px 12px 8px;color:var(--muted);font-weight:500}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+nav.tabs .n{display:inline-block;min-width:22px;margin-left:6px;padding:0 6px;border-radius:10px;background:var(--surface-2);color:var(--ink);font-size:12.5px;text-align:center}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.toolbar input,.toolbar select{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.toolbar input{flex:1;min-width:200px}
+.list{display:flex;flex-direction:column;gap:10px}
+.alert{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--c,var(--line));border-radius:8px;padding:14px 16px}
+.alert.baixar{--c:var(--ok)} .alert.cliente{--c:var(--warn)} .alert.cobrar{--c:var(--bad)} .alert.aguardando{--c:var(--wait)} .alert.semvinculo{--c:var(--muted)} .alert.feito{opacity:.72}
+.ahead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.ahead h3{margin:0;font-size:16px;font-weight:600}
+.meta{color:var(--muted);font-size:13.5px}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0 8px;padding:0;list-style:none}
+.chain li{display:flex;align-items:center;gap:6px}
+.chain li+li::before{content:"";width:14px;height:2px;background:var(--line);display:block}
+.step{display:inline-flex;flex-direction:column;padding:4px 9px;border-radius:6px;background:var(--surface-2);font-size:13px;line-height:1.25}
+.step b{font-weight:600;font-size:14px}
+.step small{color:var(--muted)}
+.step.missing{background:none;border:1px dashed var(--line);color:var(--muted)}
+.step.key{background:var(--c-bg,var(--surface-2))}
+.alert.baixar .step.key{--c-bg:var(--ok-bg)} .alert.cobrar .step.key{--c-bg:var(--bad-bg)} .alert.cliente .step.key{--c-bg:var(--warn-bg)} .alert.aguardando .step.key{--c-bg:var(--wait-bg)}
+.action{margin:4px 0 0;max-width:78ch}
+.extra{margin:6px 0 0;color:var(--muted);font-size:13.5px}
+.amounts{display:flex;gap:18px;flex-wrap:wrap;margin-top:8px;font-size:14px}
+.amounts span{color:var(--muted)} .amounts b{font-weight:600}
+.diff{color:var(--warn)}
+.empty{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:28px;text-align:center;color:var(--muted)}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;font-weight:600;background:var(--surface-2);white-space:nowrap}
+td.num{text-align:right;white-space:nowrap}
+td.obs{max-width:360px;color:var(--muted)}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:12.5px;background:var(--gray-bg);white-space:nowrap}
+.tag.remessa,.tag.boleto90{background:var(--wait-bg);color:var(--wait)} .tag.retorno,.tag.devRemessa{background:var(--ok-bg);color:var(--ok)} .tag.garantiaCliente{background:var(--warn-bg);color:var(--warn)}
+footer.foot{margin-top:28px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+@media (max-width:560px){h1{font-size:25px}.wrap{padding:20px 14px 48px}}
+</style>
+</head>
+<body>
+<section class="login" id="login" hidden>
+  <h1>Garantias Beux</h1>
+  <p class="sub">Entre com o e-mail e a senha que Cuiabá cadastrou para você.</p>
+  <form id="loginForm">
+    <label for="email">E-mail</label>
+    <input id="email" type="email" autocomplete="username" required>
+    <label for="senha">Senha</label>
+    <input id="senha" type="password" autocomplete="current-password" required>
+    <button class="primary" type="submit">Entrar</button>
+  </form>
+  <p class="status" id="loginStatus" role="status"></p>
+</section>
+<div class="wrap" id="app" hidden>
+  <div class="userbar"><span id="quem"></span><button id="trocarSenha" type="button">Trocar senha</button><button id="sair" type="button">Sair</button></div>
+  <header class="top">
+    <div>
+      <h1>Garantias Beux</h1>
+      <p class="sub" id="sub">Importe os XMLs das notas. O site encontra as referências nas informações complementares e na descrição dos itens, liga cada garantia às suas notas e avisa o que já pode ser baixado.</p>
+    </div>
+    <button class="primary" id="export" hidden>Exportar Excel</button>
+  </header>
+
+  <label class="drop" id="drop">
+    <input type="file" id="file" accept=".zip,.xml" multiple>
+    <div class="glyph" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+    </div>
+    <div>
+      <strong>Importar XMLs</strong>
+      <span class="hint">Arraste o .zip (ou os arquivos .xml) de notas de entrada ou de saída, ou clique para escolher.</span>
+    </div>
+  </label>
+  <p class="status" id="status" role="status"></p>
+
+  <section id="mine" hidden></section>
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+  <section id="view"></section>
+
+  <footer class="foot">
+    <span id="store"></span>
+    <span id="pos"></span>
+  </footer>
+</div>
+
+<script>
+// Títulos de garantia em aberto (filial, parceiro, lado, título, saldo, portador): carregados do banco, visíveis só para Cuiabá
+let TIT = [];
+
+const BEUX = "01851420";
+const FILIAIS = {"0001":"CBA","0002":"CG","0003":"JIP","0004":"SNP"};
+const DIA = 86400000;
+const fmt = v => (v||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const dt = s => s ? s.split("-").reverse().join("/") : "";
+const norm = s => (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase();
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const isBeux = c => (c||"").startsWith(BEUX);
+const filialOf = c => isBeux(c) ? (FILIAIS[c.slice(8,12)] || ("Filial " + c.slice(8,12))) : null;
+const filialNota = n => isBeux(n.emitCNPJ) ? filialOf(n.emitCNPJ) : (filialOf(n.destDoc) || "?");
+const parceiro = n => isBeux(n.emitCNPJ) ? (n.destNome || "—") : (n.emitNome || "—");
+const dias = s => s ? Math.floor((Date.now() - new Date(s + "T12:00:00").getTime()) / DIA) : 0;
+
+function titulo(filial, num, lado){
+  return TIT.find(t => t[0] === filial && String(t[3]) === String(num) && (!lado || t[2] === lado)) || null;
+}
+
+/* ---------- leitura do XML ---------- */
+function txt(el, tag){ if(!el) return ""; const e = el.getElementsByTagName(tag)[0]; return e ? e.textContent.trim() : ""; }
+function first(el, tag){ return el ? el.getElementsByTagName(tag)[0] || null : null; }
+function parseXml(text){
+  const doc = new DOMParser().parseFromString(text, "application/xml");
+  if (doc.getElementsByTagName("parsererror").length) return null;
+  const inf = first(doc, "infNFe");
+  if (!inf){
+    const ev = first(doc, "infEvento");
+    if (ev && txt(ev,"tpEvento") === "110111") return { cancel: txt(ev,"chNFe") };
+    return null;
+  }
+  const ide = first(inf,"ide"), emit = first(inf,"emit"), dest = first(inf,"dest");
+  const dets = [...inf.getElementsByTagName("det")].map(d => ({ c: txt(d,"cProd"), d: txt(d,"xProd"), q: +txt(d,"qCom") || 0, v: +txt(d,"vProd") || 0, cfop: txt(d,"CFOP"), a: txt(d,"infAdProd").slice(0,400) }));
+  return {
+    chave: (inf.getAttribute("Id") || "").replace(/^NFe/,""),
+    nNF: parseInt(txt(ide,"nNF"),10), serie: txt(ide,"serie"),
+    dh: (txt(ide,"dhEmi") || txt(ide,"dEmi")).slice(0,10),
+    natOp: txt(ide,"natOp"), tpNF: txt(ide,"tpNF"),
+    emitCNPJ: txt(emit,"CNPJ") || txt(emit,"CPF"), emitNome: txt(emit,"xNome"),
+    destDoc: dest ? (txt(dest,"CNPJ") || txt(dest,"CPF")) : "", destNome: dest ? txt(dest,"xNome") : "",
+    vNF: +txt(first(inf,"ICMSTot"),"vNF") || 0,
+    infCpl: txt(first(inf,"infAdic"),"infCpl").slice(0,2500),
+    cfops: [...new Set(dets.map(x => x.cfop))],
+    itens: dets.slice(0,40).map(({c,d,q,v,a}) => a ? {c,d,q,v,a} : {c,d,q,v}),
+    refKeys: [...inf.getElementsByTagName("refNFe")].map(e => e.textContent.trim())
+  };
+}
+
+/* ---------- referências e classificação ---------- */
+// Numeração usada pela fábrica na descrição do item: 000069255-1/000030 = NF 69255, série 1, item 30
+const SEQ_RE = /(?<![\d\/])(\d{9})\s*-\s*\d{1,3}\s*\/\s*\d{3,6}(?!\d)/g;
+const REF_RE = /(?:\bNF-?E?\b|\bN\.\s?F\.?|\bNOTAS?(?:\s+FISCA(?:L|IS))?\b)\s*(?:DE\s+(?:VENDA|SAIDA|ORIGEM|REMESSA)\s*)?(?:N[O°º]?\.?\s*)?[:\-]?\s*(\d{3,9})(?!\d)/g;
+function extractRefs(n){
+  const out = [], seen = new Set();
+  const add = (num, cnpj, src) => { if (!num || num === n.nNF || seen.has(num)) return; seen.add(num); out.push({ n: num, cnpj: cnpj || null, src: src || "obs" }); };
+  for (const k of n.refKeys || []) if (k.length === 44) add(parseInt(k.slice(25,34),10), k.slice(6,20), "chave");
+  const scan = (text, src) => {
+    const T = norm(text);
+    for (const m of T.matchAll(/(?<!\d)(\d{44})(?!\d)/g)) add(parseInt(m[1].slice(25,34),10), m[1].slice(6,20), src);
+    for (const m of T.matchAll(SEQ_RE)) add(parseInt(m[1],10), null, src);
+    for (const m of T.replace(/(?<!\d)\d{44}(?!\d)/g," ").matchAll(REF_RE)) add(parseInt(m[1],10), null, src);
+  };
+  scan(n.infCpl, "obs");
+  for (const i of n.itens || []) scan((i.d || "") + " " + (i.a || ""), "item");
+  return out;
+}
+function nfsCompra(n, refs){
+  const T = norm(n.infCpl).replace(/ORCAMENTO:\s*\d+/g," ").replace(/R\$\s*[\d.,]+/g," ").replace(/RS\s*[\d.,]+/g," ");
+  const skip = new Set(refs.map(r => r.n));
+  return [...new Set([...T.matchAll(/(?<![\d.,\/])(\d{5,9})(?![\d.,\/])/g)].map(m => +m[1]))].filter(x => !skip.has(x));
+}
+function baseKind(n){
+  const nat = norm(n.natOp), obs = norm(n.infCpl), itx = norm((n.itens || []).map(i => i.d + " " + (i.a || "")).join(" ")), all = nat + " " + obs + " " + itx;
+  if (isBeux(n.emitCNPJ)){
+    if (/GARANTI/.test(nat) && (/REMESSA/.test(nat) || n.cfops.some(c => /949$/.test(c)))) return "remessa";
+    if (/GARANTIA\s*90\s*DIAS/.test(obs)) return "boleto90";
+    if (/DEVOLU/.test(nat)) return "devolucao";
+    if (/TRANSF/.test(nat) && /GARANTI/.test(obs)) return "transf";
+    if (/GARANTI/.test(nat)) return "saidaGarantia";
+    return "outra";
+  }
+  if (/RETORNO\s+(DE\s+)?GARANTI/.test(all)) return "retorno";
+  if (/GARANTI/.test(all)) return "garantiaRecebida";
+  if (/DEVOLU/.test(nat)) return "devolucaoRecebida";
+  return "outra";
+}
+const KIND_LABEL = { remessa:"Remessa à fábrica", boleto90:"Peça c/ boleto 90 dias", retorno:"Retorno da fábrica", devRemessa:"Devolução de remessa", garantiaCliente:"Garantia do cliente", transf:"Transferência de garantia", saidaGarantia:"Saída de garantia", outra:"Venda / outra" };
+
+function analyze(notes){
+  const byNum = new Map();
+  for (const n of notes){ n._base = baseKind(n); n._refs = extractRefs(n); n._fil = filialNota(n); if (isBeux(n.emitCNPJ)) { const a = byNum.get(n.nNF) || []; a.push(n); byNum.set(n.nNF, a); } }
+  const resolve = (r, from) => {
+    let c = (byNum.get(r.n) || []).filter(x => x.chave !== from.chave);
+    if (r.cnpj){ const c2 = c.filter(x => x.emitCNPJ === r.cnpj); if (c2.length) c = c2; }
+    return c.find(x => x._fil === from._fil) || c[0] || null;
+  };
+  for (const n of notes) n._tg = n._refs.map(r => ({ r, t: resolve(r, n) }));
+  const remessaRef = (n, x) => (x.t && x.t._base === "remessa") || (!x.t && (() => { const t = titulo(n._fil, x.r.n, "Receber"); return t && t[5] === "S - Fábrica"; })());
+  for (const n of notes){
+    const b = n._base;
+    if (["remessa","boleto90","transf","saidaGarantia","retorno"].includes(b)) n._kind = b;
+    else if (b === "devolucao") n._kind = n._tg.some(x => remessaRef(n, x)) ? "devRemessa" : "outra";
+    else if (b === "garantiaRecebida" || b === "devolucaoRecebida") n._kind = n._tg.some(x => remessaRef(n, x)) ? "retorno" : (b === "garantiaRecebida" ? "garantiaCliente" : "outra");
+    else n._kind = (!isBeux(n.emitCNPJ) && n._tg.some(x => remessaRef(n, x))) ? "retorno" : "outra";
+  }
+  const alerts = [], linkedRem = new Set(), linkedBol = new Set();
+  const stepOf = (n, label, key) => ({ label, num: n.nNF, date: n.dh, key: !!key });
+  const remTargets = n => n._tg.filter(x => remessaRef(n, x)).map(x => x.t || { nNF: x.r.n, virtual: true, _fil: n._fil, vNF: (titulo(n._fil, x.r.n, "Receber") || [])[4] || 0 });
+  const saldoRec = m => { const t = titulo(m._fil, m.nNF, "Receber"); return t ? t[4] : (m.virtual ? m.vNF : m.vNF); };
+
+  // Quanto de cada remessa já voltou (soma dos produtos dos retornos, sem impostos)
+  const prodTotal = n => (n.itens && n.itens.length) ? Math.round(n.itens.reduce((s, i) => s + i.v, 0) * 100) / 100 : n.vNF;
+  const retornado = new Map();
+  const rets = notes.filter(n => n._kind === "retorno" || n._kind === "devRemessa");
+  for (const n of rets){
+    for (const m of remTargets(n)){
+      const k = m._fil + "|" + m.nNF, e = retornado.get(k) || { total: 0, itens: [], nums: [] };
+      e.total += n._kind === "devRemessa" ? n.vNF : prodTotal(n); e.itens.push(...(n.itens || [])); e.nums.push({ n: n.nNF, dh: n.dh });
+      retornado.set(k, e);
+    }
+  }
+  for (const n of rets){
+    const ms = remTargets(n);
+    if (!ms.length) continue;
+    const isDev = n._kind === "devRemessa";
+    const rec = ms.reduce((s, m) => s + saldoRec(m), 0);
+    const nums = ms.map(m => m.nNF).join(" + ");
+    const parcial = !isDev && ms.length === 1 && !ms[0].virtual && prodTotal(n) < prodTotal(ms[0]) - 0.5;
+    const impostos = isDev ? 0 : Math.round((n.vNF - prodTotal(n)) * 100) / 100;
+    const extras = [n._refs.some(r => r.src === "item") ? "Referência encontrada na descrição do item." : "", impostos > 0.01 ? `O valor da nota inclui R$ ${fmt(impostos)} de impostos (IPI/ST) sobre R$ ${fmt(prodTotal(n))} em produtos.` : ""].filter(Boolean).join(" ");
+    alerts.push({ id: "R:" + n.chave, cat: "baixar", tipo: isDev ? "Remessa devolvida pela fábrica" : (parcial ? "Retorno parcial da fábrica" : "Retorno da fábrica chegou"), fil: n._fil, parc: isDev ? n.destNome : n.emitNome,
+      steps: [...ms.map(m => ({ label: "Remessa", num: m.nNF, date: m.dh, note: m.virtual ? "título em aberto" : "" })), stepOf(n, isDev ? "Devolução" : "Retorno", 1)],
+      action: isDev ? `Baixar o receber ${nums} com a nota de devolução ${n.nNF}.` : parcial ? `Abater do receber ${nums} o pagar ${n.nNF}. O restante da remessa continua aguardando a fábrica.` : `Compensar o receber ${nums} com o pagar ${n.nNF}.`,
+      extra: extras,
+      amounts: parcial ? [["Remessa", ms[0].vNF], ["Este retorno", n.vNF]] : [["A receber", rec], [isDev ? "Devolução" : "A pagar", n.vNF]],
+      diff: parcial ? 0 : Math.round((rec - n.vNF) * 100) / 100, sort: n.dh });
+  }
+  for (const n of notes){
+    if (n._kind !== "garantiaCliente") continue;
+    const targets = n._tg.filter(x => x.t).map(x => x.t);
+    const nums = new Set(targets.map(t => t.nNF));
+    const bol = notes.find(b => b._kind === "boleto90" && b._fil === n._fil && (nums.has(b.nNF) || b._tg.some(x => nums.has(x.r.n))));
+    const venda = targets.find(t => t._kind !== "boleto90");
+    if (bol){
+      linkedBol.add(bol.chave);
+      const tr = titulo(bol._fil, bol.nNF, "Receber");
+      alerts.push({ id: "G:" + n.chave, cat: "baixar", tipo: "Garantia do cliente com boleto", fil: n._fil, parc: n.emitNome,
+        steps: [venda ? stepOf(venda, "Venda") : null, stepOf(bol, "Boleto 90 dias"), stepOf(n, "Garantia do cliente", 1)].filter(Boolean),
+        action: `Compensar o receber ${bol.nNF} (boleto 90 dias) com o pagar ${n.nNF} (garantia do cliente).`,
+        extra: n._refs.some(r => r.src === "item") ? "Referência encontrada na descrição do item." : "",
+        amounts: [["A receber", tr ? tr[4] : bol.vNF], ["A pagar", n.vNF]], diff: Math.round(((tr ? tr[4] : bol.vNF) - n.vNF) * 100) / 100, sort: n.dh });
+    } else {
+      alerts.push({ id: "G:" + n.chave, cat: "cliente", tipo: "Garantia do cliente sem boleto", fil: n._fil, parc: n.emitNome,
+        steps: [venda ? stepOf(venda, "Venda") : { label: "Venda", missing: true, num: n._refs[0] ? n._refs[0].n : null }, stepOf(n, "Garantia do cliente", 1)],
+        action: `Combinar com o cliente se ele quer a peça ou crédito e baixar o pagar ${n.nNF}.`,
+        extra: n._refs.length ? "" : "A nota não cita a venda de origem.",
+        amounts: [["A pagar", n.vNF]], sort: n.dh });
+    }
+  }
+  for (const n of notes){
+    if (n._kind === "boleto90" && !linkedBol.has(n.chave)){
+      const d = dias(n.dh), venda = n._tg.find(x => x.t);
+      const codes = new Set(n.itens.map(i => i.c));
+      const rem = notes.find(m => m._kind === "remessa" && m.dh >= n.dh && m.itens.some(i => codes.has(i.c)));
+      const tr = titulo(n._fil, n.nNF, "Receber");
+      const venc = d > 90;
+      alerts.push({ id: "B:" + n.chave, cat: venc ? "cobrar" : "aguardando", tipo: venc ? "Boleto de garantia vencido" : "Peça enviada com boleto", fil: n._fil, parc: n.destNome,
+        steps: [venda ? stepOf(venda.t, "Venda") : (n._refs[0] ? { label: "Venda", num: n._refs[0].n } : null), stepOf(n, "Boleto 90 dias", 1), { label: "Garantia do cliente", missing: true }].filter(Boolean),
+        action: venc ? `Boleto com ${d} dias sem a nota de garantia do cliente: cobrar o boleto ${n.nNF} ou verificar com o cliente.` : `Aguardando a nota de garantia do cliente (${d} dias desde o envio).`,
+        extra: rem ? `Mesma peça (cód. ${[...codes].find(c => rem.itens.some(i => i.c === c))}) foi na remessa ${rem.nNF} de ${dt(rem.dh)}.` : "",
+        amounts: [["A receber", tr ? tr[4] : n.vNF]], sort: n.dh });
+    }
+    const rv = n._kind === "remessa" ? retornado.get(n._fil + "|" + n.nNF) : null;
+    if (n._kind === "remessa" && (!rv || rv.total < prodTotal(n) - 0.5)){
+      const d = dias(n.dh), late = d > 90, compra = nfsCompra(n, n._refs);
+      const tr = titulo(n._fil, n.nNF, "Receber");
+      const falta = rv ? Math.round((prodTotal(n) - rv.total) * 100) / 100 : 0;
+      const pend = rv ? n.itens.filter(i => !rv.itens.some(r => Math.abs(r.v - i.v) < 0.02)) : [];
+      alerts.push({ id: "M:" + n.chave, cat: late ? "cobrar" : "aguardando",
+        tipo: rv ? (late ? "Retorno parcial, restante atrasado" : "Retorno parcial da fábrica") : (late ? "Remessa sem retorno" : "Aguardando a fábrica"), fil: n._fil, parc: n.destNome,
+        steps: [stepOf(n, "Remessa", 1), ...(rv ? rv.nums.map(x => ({ label: "Retorno", num: x.n, date: x.dh })) : []), { label: rv ? "Restante" : "Retorno", missing: true }],
+        action: rv ? `Faltam R$ ${fmt(falta)} em produtos da remessa (enviada há ${d} dias)${late ? ": cobrar a fábrica." : "."}` : (late ? `Remessa enviada há ${d} dias sem retorno: cobrar a fábrica.` : `Remessa enviada há ${d} dias. O alerta aparece quando o retorno for importado.`),
+        extra: pend.length ? `Itens ainda sem retorno: ${pend.map(i => i.d.split(" ")[0]).join(", ")}.` : (compra.length ? `NFs de compra citadas na remessa: ${compra.join(", ")}.` : ""),
+        amounts: [["A receber", tr ? tr[4] : n.vNF]], sort: n.dh });
+    }
+    if (n._kind === "transf"){
+      alerts.push({ id: "T:" + n.chave, cat: "aguardando", tipo: "Peças de garantia transferidas", fil: n._fil, parc: "Para " + (filialOf(n.destDoc) || n.destNome),
+        steps: [stepOf(n, "Transferência", 1)], action: `Peças de garantia enviadas para ${filialOf(n.destDoc) || n.destNome}; a remessa à fábrica deve sair de lá.`,
+        extra: n.itens.slice(0,3).map(i => `${i.q} × ${i.d}`).join("; "), amounts: [["Valor", n.vNF]], sort: n.dh });
+    }
+    if (n._kind === "saidaGarantia"){
+      const g = n._tg.find(x => x.t && x.t._kind === "garantiaCliente");
+      alerts.push({ id: "S:" + n.chave, cat: g ? "baixar" : (n._refs.length ? "aguardando" : "semvinculo"), tipo: "Saída de garantia ao cliente", fil: n._fil, parc: n.destNome,
+        steps: [g ? stepOf(g.t, "Garantia do cliente") : null, stepOf(n, "Saída ao cliente", 1)].filter(Boolean),
+        action: g ? `Compensar o receber ${n.nNF} com o pagar ${g.t.nNF}.` : (n._refs.length ? `Cita a NF ${n._refs.map(r => r.n).join(", ")}, ainda não importada.` : "Nota de garantia sem referência: conferir."),
+        amounts: [["Valor", n.vNF]], sort: n.dh });
+    }
+  }
+  for (const n of notes){
+    if ((n._base === "retorno" || n._base === "garantiaRecebida") && n._kind === "retorno" && !remTargets(n).length){
+      alerts.push({ id: "X:" + n.chave, cat: "semvinculo", tipo: "Retorno sem remessa encontrada", fil: n._fil, parc: n.emitNome, steps: [stepOf(n, "Retorno", 1)],
+        action: n._refs.length ? `Cita a NF ${n._refs.map(r => r.n).join(", ")}, que não está entre as notas importadas nem nos títulos em aberto.` : "A nota não cita a remessa de origem: conferir.", amounts: [["A pagar", n.vNF]], sort: n.dh });
+    }
+  }
+  return alerts;
+}
+
+/* ---------- conexão com o banco (Supabase) ---------- */
+// Papéis: "admin" (Cuiabá) vê e ajusta tudo; "filial" importa e consulta só a própria filial.
+// As regras de acesso ficam no banco: mesmo mexendo no site, ninguém lê dados de outra filial.
+const CFG = window.GARANTIAS_CONFIG || {};
+let sb = null, USER = null, PERFIL = null, ROLE = "carregando";
+let NOTES = new Map(), ACOES = {}, PERFIS = [], IMPORTS = [], POS = "";
+let tab = "baixar", filtro = "", filFiltro = "";
+const clean = n => { const o = {}; for (const k in n) if (k[0] !== "_") o[k] = n[k]; return o; };
+const safeId = id => id.replace(/[^A-Za-z0-9_-]/g, "_");
+const allNotes = () => NOTES;
+const $ = id => document.getElementById(id);
+const dthr = s => s ? new Date(s).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
+function setStatus(t, cls){ const s = $("status"); s.textContent = t; s.className = "status" + (cls ? " " + cls : ""); }
+function loginStatus(t, cls){ const s = $("loginStatus"); s.textContent = t; s.className = "status" + (cls ? " " + cls : ""); }
+
+async function fetchAll(table, cols, orderCol){
+  const out = [];
+  for (let from = 0; ; from += 1000){
+    const { data, error } = await sb.from(table).select(cols).order(orderCol).range(from, from + 999);
+    if (error) throw error;
+    out.push(...data);
+    if (data.length < 1000) break;
+  }
+  return out;
+}
+
+async function init(){
+  $("login").hidden = true; $("app").hidden = true;
+  if (!window.supabase || !CFG.supabaseUrl || !CFG.supabaseKey || /COLE_AQUI/.test(CFG.supabaseUrl + CFG.supabaseKey)){
+    $("login").hidden = false; $("loginForm").hidden = true;
+    loginStatus(window.supabase ? "Falta configurar o arquivo config.js com os códigos do Supabase (passo 5 do guia)." : "Não foi possível carregar a biblioteca do Supabase. Verifique a internet e recarregue a página.", "err");
+    return;
+  }
+  sb = window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseKey);
+  const { data } = await sb.auth.getSession();
+  if (!data.session){ $("login").hidden = false; return; }
+  await entrar(data.session.user);
+}
+async function entrar(u){
+  USER = u;
+  const { data, error } = await sb.from("perfis").select("user_id,email,filial,admin").eq("user_id", u.id).maybeSingle();
+  if (error || !data){
+    $("login").hidden = false; $("loginForm").hidden = true;
+    loginStatus("Seu usuário existe, mas ainda não tem perfil no banco. Avise Cuiabá (rodar de novo o script 01 resolve).", "err");
+    return;
+  }
+  PERFIL = data;
+  ROLE = PERFIL.admin ? "admin" : "filial";
+  $("login").hidden = true; $("app").hidden = false;
+  $("quem").textContent = `${PERFIL.email}${PERFIL.admin ? " · Cuiabá (administrador)" : PERFIL.filial ? " · Filial " + PERFIL.filial : ""}`;
+  $("store").textContent = ROLE === "admin" ? "Painel de Cuiabá: vê as notas de todas as filiais." : "Você vê só os dados da sua filial.";
+  $("drop").hidden = ROLE === "filial" && !PERFIL.filial;
+  render();
+  await carregar();
+}
+async function carregar(){
+  setStatus("Carregando dados…");
+  try {
+    const [notas, tits, acoes, aj, imps] = await Promise.all([
+      fetchAll("notas", "chave,dados", "chave"),
+      fetchAll("titulos", "filial,parceiro,lado,titulo,saldo,portador", "id"),
+      fetchAll("acoes", "id,status", "id"),
+      sb.from("ajustes").select("chave,valor"),
+      fetchAll("importacoes", "user_id,filial,arquivos,notas,em", "em")
+    ]);
+    NOTES = new Map(notas.map(r => [r.chave, r.dados]));
+    TIT = tits.map(t => [t.filial, t.parceiro, t.lado, String(t.titulo), Number(t.saldo), t.portador]);
+    ACOES = {}; acoes.forEach(a => { ACOES[a.id] = { status: a.status }; });
+    POS = (((aj.data || []).find(x => x.chave === "posicao_titulos")) || {}).valor || "";
+    IMPORTS = imps;
+    if (ROLE === "admin") PERFIS = await fetchAll("perfis", "user_id,email,filial,admin,criado_em", "criado_em");
+    setStatus("");
+  } catch(e){ setStatus("Não foi possível carregar os dados: " + (e.message || e), "err"); }
+  render();
+}
+
+$("loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  loginStatus("Entrando…");
+  const { data, error } = await sb.auth.signInWithPassword({ email: $("email").value.trim(), password: $("senha").value });
+  if (error){ loginStatus(/invalid/i.test(error.message) ? "E-mail ou senha incorretos." : "Não foi possível entrar: " + error.message, "err"); return; }
+  loginStatus("");
+  await entrar(data.user);
+});
+$("sair").addEventListener("click", async () => { await sb.auth.signOut(); location.reload(); });
+$("trocarSenha").addEventListener("click", async () => {
+  const p = prompt("Digite a nova senha (mínimo 6 caracteres):");
+  if (!p) return;
+  if (p.length < 6){ alert("A senha precisa ter pelo menos 6 caracteres."); return; }
+  const { error } = await sb.auth.updateUser({ password: p });
+  alert(error ? "Não foi possível trocar a senha: " + error.message : "Senha alterada.");
+});
+
+async function setAcao(id, status, fil){
+  if (ROLE !== "admin") return;
+  const { error } = await sb.from("acoes").upsert({ id: safeId(id), filial: fil || null, status, em: new Date().toISOString(), por: USER.id });
+  if (error){ setStatus("Não foi possível salvar: " + error.message, "err"); return; }
+  ACOES[safeId(id)] = { status };
+  render();
+}
+async function setFilialUsuario(id, filial){
+  const { error } = await sb.from("perfis").update({ filial: filial || null }).eq("user_id", id);
+  if (error){ setStatus("Não foi possível salvar a filial: " + error.message, "err"); return; }
+  const p = PERFIS.find(x => x.user_id === id); if (p) p.filial = filial || null;
+  setStatus("Filial do usuário atualizada.", "ok");
+  render();
+}
+
+/* ---------- importação ---------- */
+async function importFiles(files){
+  if (ROLE === "carregando") return;
+  if (ROLE === "filial" && !PERFIL.filial){ setStatus("Cuiabá ainda não definiu a sua filial.", "err"); return; }
+  const texts = [];
+  setStatus("Lendo arquivos…");
+  for (const f of files){
+    if (/\.zip$/i.test(f.name)){
+      const z = await JSZip.loadAsync(f);
+      const xs = Object.values(z.files).filter(e => !e.dir && /\.xml$/i.test(e.name));
+      for (let i = 0; i < xs.length; i++){ texts.push(await xs[i].async("string")); if (i % 40 === 0) setStatus(`Lendo ${i + 1} de ${xs.length} XMLs…`); }
+    } else if (/\.xml$/i.test(f.name)) texts.push(await f.text());
+  }
+  const parsed = [], cancels = new Set();
+  let bad = 0;
+  for (const t of texts){ const p = parseXml(t); if (!p){ bad++; continue; } if (p.cancel) cancels.add(p.cancel); else parsed.push(p); }
+  const batch = parsed.filter(p => !cancels.has(p.chave));
+  const all = new Map(NOTES); batch.forEach(p => all.set(p.chave, p));
+  const list = [...all.values()].map(n => ({ ...n }));
+  analyze(list);
+  const byKey = new Map(list.map(n => [n.chave, n]));
+  const relevant = new Set();
+  for (const n of list){
+    const recebidaComRef = !isBeux(n.emitCNPJ) && n._refs.length;
+    const devComRef = n._base === "devolucao" && n._refs.length;
+    if (n._kind !== "outra" || recebidaComRef || devComRef){ relevant.add(n.chave); n._tg.forEach(x => x.t && relevant.add(x.t.chave)); }
+  }
+  let outraFilial = 0;
+  const rows = [];
+  for (const p of batch){
+    if (!relevant.has(p.chave) || NOTES.has(p.chave)) continue;
+    const fil = byKey.get(p.chave)._fil;
+    if (!fil || fil === "?") continue;
+    if (ROLE === "filial" && fil !== PERFIL.filial){ outraFilial++; continue; }
+    rows.push({ chave: p.chave, filial: fil, dados: clean(p), enviado_por: USER.id });
+  }
+  try {
+    for (let i = 0; i < rows.length; i += 100){
+      setStatus(`Salvando ${Math.min(i + 100, rows.length)} de ${rows.length} notas de garantia…`);
+      const { error } = await sb.from("notas").upsert(rows.slice(i, i + 100), { onConflict: "chave", ignoreDuplicates: true });
+      if (error) throw error;
+    }
+    if (ROLE === "admin"){
+      const del = [...cancels].filter(c => NOTES.has(c));
+      if (del.length){ const { error } = await sb.from("notas").delete().in("chave", del); if (error) throw error; }
+    }
+    await sb.from("importacoes").insert({ user_id: USER.id, filial: ROLE === "filial" ? PERFIL.filial : (rows[0] ? rows[0].filial : null), arquivos: texts.length, notas: rows.length });
+  } catch(e){ setStatus("Erro ao salvar: " + (e.message || e) + ". Tente importar de novo.", "err"); return; }
+  const garantia = batch.filter(p => byKey.get(p.chave)._kind !== "outra").length;
+  await carregar();
+  setStatus(`${texts.length} arquivos lidos: ${parsed.length} notas${cancels.size ? `, ${cancels.size} cancelamentos` : ""}${bad ? `, ${bad} ignorados` : ""}. ${garantia} de garantia; ${rows.length} novas salvas.${outraFilial ? ` ${outraFilial} notas de outra filial foram ignoradas.` : ""}`, "ok");
+}
+
+/* ---------- exportação ---------- */
+function exportar(){
+  if (!window.XLSX){ setStatus("Não foi possível gerar o Excel neste navegador.", "err"); return; }
+  const notes = [...NOTES.values()].map(n => ({ ...n }));
+  const alerts = analyze(notes);
+  alerts.forEach(a => { const st = ACOES[safeId(a.id)]; a.feito = st && st.status === "feito"; });
+  const catName = Object.fromEntries(CATS);
+  const aRows = alerts.map(a => ({ "Situação": a.feito ? "Feito" : "Pendente", "Categoria": catName[a.cat] || a.cat, "Alerta": a.tipo, "Filial": a.fil, "Parceiro": a.parc,
+    "Notas da corrente": a.steps.map(s => s.label + " " + (s.num ? "NF " + s.num : "(falta)")).join(" > "), "O que fazer": a.action, "Observação": a.extra || "",
+    "Valor 1": a.amounts && a.amounts[0] ? a.amounts[0][1] : "", "Valor 2": a.amounts && a.amounts[1] ? a.amounts[1][1] : "", "Diferença": a.diff || "" }));
+  const nRows = notes.sort((a, b) => (a._fil + a.dh).localeCompare(b._fil + b.dh)).map(n => ({ "Filial": n._fil, "NF": n.nNF, "Série": n.serie, "Data": n.dh ? new Date(n.dh + "T12:00:00") : "", "Tipo": KIND_LABEL[n._kind] || n._kind,
+    "Natureza da operação": n.natOp, "Emitente": n.emitNome, "CNPJ emitente": n.emitCNPJ, "Destinatário": n.destNome, "CNPJ/CPF destinatário": n.destDoc, "Valor (R$)": n.vNF,
+    "NFs citadas": n._refs.map(r => r.n + (r.src === "item" ? " (item)" : "")).join(", "), "Itens": n.itens.map(i => `${i.q} x ${i.d}${i.a ? " [" + i.a + "]" : ""} = ${fmt(i.v)}`).join(" | "),
+    "Informações complementares": n.infCpl, "Chave de acesso": n.chave }));
+  const wb = XLSX.utils.book_new();
+  const ws1 = XLSX.utils.json_to_sheet(aRows), ws2 = XLSX.utils.json_to_sheet(nRows, { cellDates: true });
+  ws1["!cols"] = [10, 20, 28, 7, 30, 46, 60, 40, 12, 12, 10].map(w => ({ wch: w }));
+  ws2["!cols"] = [7, 9, 6, 11, 22, 28, 30, 16, 30, 16, 12, 18, 60, 60, 46].map(w => ({ wch: w }));
+  XLSX.utils.book_append_sheet(wb, ws1, "Alertas");
+  XLSX.utils.book_append_sheet(wb, ws2, "Notas");
+  XLSX.writeFile(wb, "garantias-beux-" + new Date().toISOString().slice(0, 10) + ".xlsx");
+}
+
+/* ---------- interface ---------- */
+const CATS = [["baixar","Para baixar"],["cliente","Decidir com o cliente"],["cobrar","Cobrar"],["aguardando","Aguardando"],["semvinculo","Sem vínculo"],["feitos","Feitos"],["notas","Notas importadas"],["filiais","Usuários das filiais"]];
+function mineHtml(){
+  const mine = IMPORTS.filter(x => x.user_id === USER.id);
+  const last = mine[mine.length - 1];
+  const total = mine.reduce((s, x) => s + (x.notas || 0), 0);
+  return last
+    ? `<h2>Suas importações</h2><p><b>${total}</b> notas de garantia enviadas até agora.</p><p>Última importação em <b>${esc(dthr(last.em))}</b>: ${last.arquivos || 0} arquivos lidos, ${last.notas || 0} notas de garantia novas.</p>`
+    : `<h2>Nenhuma importação ainda</h2><p>Gere o .zip na rotina R648 do Movere (Download dos XMLs dos Documentos Eletrônicos) e arraste aqui em cima. Pode mandar notas de entrada e de saída.</p>`;
+}
+function render(){
+  const tabs = $("tabs"), view = $("view"), mine = $("mine");
+  $("export").hidden = ROLE !== "admin";
+  if (ROLE === "carregando"){ tabs.innerHTML = ""; mine.hidden = true; view.innerHTML = `<div class="empty">Carregando…</div>`; return; }
+  const readOnly = ROLE === "filial";
+  const F = readOnly ? (PERFIL.filial || null) : null;
+  $("pos").textContent = (!readOnly || F) && POS ? `Títulos em aberto conferidos com a posição de ${dt(POS)}.` : "";
+  if (readOnly){
+    $("sub").textContent = F
+      ? `Importe aqui os XMLs das notas da filial ${F}. Abaixo, o painel de garantias da sua filial, só para consulta; as baixas são marcadas por Cuiabá.`
+      : "Seu acesso está aguardando Cuiabá definir qual é a sua filial.";
+    mine.hidden = false; mine.className = "mine";
+    mine.innerHTML = F ? mineHtml() : `<h2>Aguardando liberação</h2><p>Quando Cuiabá definir a sua filial, a área de importação e o painel aparecem aqui. Recarregue a página depois.</p>`;
+    if (!F){ tabs.innerHTML = ""; view.innerHTML = ""; return; }
+  } else mine.hidden = true;
+  const notes = [...NOTES.values()].map(n => ({ ...n }));
+  let alerts = analyze(notes).sort((a, b) => (b.sort || "").localeCompare(a.sort || ""));
+  alerts.forEach(a => { const st = ACOES[safeId(a.id)]; a.feito = st && st.status === "feito"; });
+  if (F) alerts = alerts.filter(a => a.fil === F);
+  const visNotes = F ? notes.filter(n => n._fil === F) : notes;
+  const cats = ROLE === "admin" ? CATS : CATS.filter(([k]) => k !== "filiais");
+  const counts = {}; cats.forEach(([k]) => counts[k] = 0);
+  alerts.forEach(a => counts[a.feito ? "feitos" : a.cat]++);
+  counts.notas = visNotes.length; counts.filiais = PERFIS.filter(p => !p.admin).length;
+  if (!cats.some(([k]) => k === tab)) tab = "baixar";
+  tabs.innerHTML = cats.map(([k, l]) => `<button role="tab" aria-selected="${tab === k}" data-tab="${k}">${l}<span class="n">${counts[k]}</span></button>`).join("");
+  const fils = [...new Set(visNotes.map(n => n._fil))].sort();
+  const toolbar = `<div class="toolbar"><input type="search" id="q" placeholder="Buscar por NF, parceiro ou peça" value="${esc(filtro)}">${F ? "" : `<select id="fil"><option value="">Todas as filiais</option>${fils.map(f => `<option ${f === filFiltro ? "selected" : ""}>${esc(f)}</option>`).join("")}</select>`}<button id="recarregar" type="button">Atualizar</button></div>`;
+  const match = s => !filtro || norm(s).includes(norm(filtro));
+  if (tab === "filiais"){
+    const opts = sel => ["", "CBA", "CG", "JIP", "SNP"].map(f => `<option value="${f}" ${f === (sel || "") ? "selected" : ""}>${f || "Escolher…"}</option>`).join("");
+    const lastImp = id => { const xs = IMPORTS.filter(x => x.user_id === id); return xs.length ? xs[xs.length - 1] : null; };
+    const totImp = id => IMPORTS.filter(x => x.user_id === id).reduce((s, x) => s + (x.notas || 0), 0);
+    view.innerHTML = `<p class="extra" style="margin:0 0 10px">Os usuários são criados no Supabase (Authentication → Users). Depois, escolha aqui a filial de cada um: ele passa a ver e importar só as notas dessa filial.</p>` +
+      `<div class="tablewrap"><table><thead><tr><th>Usuário</th><th>Filial</th><th>Última importação</th><th>Notas enviadas</th></tr></thead><tbody>${PERFIS.map(p => { const li = lastImp(p.user_id); return `<tr><td>${esc(p.email)}${p.admin ? " <span class=\"tag\">administrador</span>" : ""}</td><td>${p.admin ? esc(p.filial || "CBA") : `<select data-user="${esc(p.user_id)}" aria-label="Filial de ${esc(p.email)}">${opts(p.filial)}</select>`}</td><td>${esc(li ? dthr(li.em) : "ainda não importou")}</td><td class="num">${totImp(p.user_id)}</td></tr>`; }).join("")}</tbody></table></div>`;
+  } else if (!visNotes.length){
+    view.innerHTML = `<div class="empty">${F ? "Ainda não há notas de garantia da sua filial." : "Nenhuma nota importada ainda. Arraste acima o .zip com os XMLs de entrada ou de saída."}</div>`;
+  } else if (tab === "notas"){
+    const rows = visNotes.filter(n => (!filFiltro || F || n._fil === filFiltro) && match([n.nNF, parceiro(n), n.natOp, n.infCpl, n.itens.map(i => i.c + " " + i.d + " " + (i.a || "")).join(" ")].join(" ")))
+      .sort((a, b) => b.dh.localeCompare(a.dh));
+    view.innerHTML = toolbar + `<div class="tablewrap"><table><thead><tr><th>Filial</th><th>NF</th><th>Data</th><th>Tipo</th><th>Parceiro</th><th>Valor (R$)</th><th>NFs citadas</th><th>Informações complementares</th></tr></thead><tbody>` +
+      rows.map(n => `<tr><td>${esc(n._fil)}</td><td>${n.nNF}</td><td>${dt(n.dh)}</td><td><span class="tag ${n._kind}">${esc(KIND_LABEL[n._kind] || n._kind)}</span></td><td>${esc(parceiro(n))}</td><td class="num">${fmt(n.vNF)}</td><td>${n._refs.map(r => r.n + (r.src === "item" ? " (item)" : "")).join(", ") || "—"}</td><td class="obs" title="${esc(n.infCpl)}">${esc(n.infCpl.slice(0,160))}${n.infCpl.length > 160 ? "…" : ""}</td></tr>`).join("") +
+      `</tbody></table></div>`;
+  } else {
+    const list = alerts.filter(a => (tab === "feitos" ? a.feito : (!a.feito && a.cat === tab)) && (!filFiltro || F || a.fil === filFiltro) && match([a.tipo, a.parc, a.action, a.extra, a.steps.map(s => s.num).join(" ")].join(" ")));
+    const emptyMsg = { baixar: "Nada pronto para baixar. Importe as notas de entrada (retornos da fábrica e garantias de clientes) para os vínculos aparecerem.", cliente: "Nenhuma garantia de cliente esperando decisão.", cobrar: "Nada para cobrar.", aguardando: "Nada aguardando.", semvinculo: "Todas as notas de garantia têm vínculo.", feitos: "Nenhum item marcado como feito ainda." }[tab];
+    view.innerHTML = toolbar + (list.length ? `<div class="list">${list.map(a => card(a, readOnly)).join("")}</div>` : `<div class="empty">${emptyMsg}</div>`);
+  }
+  const q = $("q");
+  if (q){ q.oninput = e => { filtro = e.target.value; const pos = e.target.selectionStart; render(); const q2 = $("q"); if (q2){ q2.focus(); q2.setSelectionRange(pos, pos); } }; }
+  const fs = $("fil"); if (fs) fs.onchange = e => { filFiltro = e.target.value; render(); };
+  const rb = $("recarregar"); if (rb) rb.onclick = () => carregar();
+}
+function card(a, readOnly){
+  const steps = a.steps.map(s => s.missing
+    ? `<li><span class="step missing"><b>${esc(s.label)}</b><small>${s.num ? "NF " + s.num + " não importada" : "falta"}</small></span></li>`
+    : `<li><span class="step ${s.key ? "key" : ""}"><small>${esc(s.label)}</small><b>NF ${s.num}</b><small>${s.date ? dt(s.date) : esc(s.note || "")}</small></span></li>`).join("");
+  const amounts = (a.amounts || []).map(([l, v]) => `<div><span>${esc(l)}:</span> <b>R$ ${fmt(v)}</b></div>`).join("") +
+    (a.diff ? `<div class="diff">Diferença: R$ ${fmt(Math.abs(a.diff))}</div>` : "");
+  const ctl = readOnly ? `<span class="tag">${a.feito ? "Baixado por Cuiabá" : "Pendente"}</span>` : `<button data-acao="${esc(a.id)}" data-fil="${esc(a.fil)}" data-st="${a.feito ? "pendente" : "feito"}">${a.feito ? "Reabrir" : "Marcar como feito"}</button>`;
+  return `<article class="alert ${a.feito ? "feito" : a.cat}">
+    <div class="ahead"><div><h3>${esc(a.tipo)}</h3><div class="meta">${esc(a.fil)}, ${esc(a.parc)}</div></div>${ctl}</div>
+    <ol class="chain">${steps}</ol>
+    <p class="action">${esc(a.action)}</p>
+    ${a.extra ? `<p class="extra">${esc(a.extra)}</p>` : ""}
+    <div class="amounts">${amounts}</div>
+  </article>`;
+}
+
+$("tabs").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (b){ tab = b.dataset.tab; render(); } });
+$("view").addEventListener("click", e => { const b = e.target.closest("[data-acao]"); if (b) setAcao(b.dataset.acao, b.dataset.st, b.dataset.fil); });
+$("view").addEventListener("change", e => { const s = e.target.closest("select[data-user]"); if (s && ROLE === "admin") setFilialUsuario(s.dataset.user, s.value); });
+$("export").addEventListener("click", () => { try { exportar(); } catch(err){ setStatus("Erro ao gerar o Excel: " + err.message, "err"); } });
+const drop = $("drop"), input = $("file");
+input.addEventListener("change", () => { if (input.files.length) importFiles([...input.files]).catch(err => setStatus("Erro ao ler os arquivos: " + err.message, "err")); input.value = ""; });
+["dragenter","dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => { const fs = [...e.dataTransfer.files]; if (fs.length) importFiles(fs).catch(err => setStatus("Erro ao ler os arquivos: " + err.message, "err")); });
+
+init().catch(e => { $("login").hidden = false; loginStatus("Erro ao iniciar: " + (e.message || e), "err"); });
+
+</script>
+</body>
+</html>
