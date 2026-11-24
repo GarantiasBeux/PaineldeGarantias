@@ -722,7 +722,7 @@ let GAR = [], secao = (location.hash === "#notas") ? "notas" : "garantias";
 const gf = { nf: "", cli: "", status: "", fil: "", antec: "", di: "", df: "" };
 const FIL_NOME = { CBA: "Matriz (Cuiabá)", CG: "Campo Grande", JIP: "Ji-Paraná", SNP: "Sinop" };
 const STATUS_G = ["Solicitado", "Em análise", "Procedente", "Improcedente"];
-const PARECER_V = ["Defeito de fábrica", "Mau uso / aplicação", "Desgaste natural", "Sem defeito aparente", "Outro"];
+const PARECER_V = ["Defeito de fábrica", "Desgaste prematuro", "Quebrado/Danificado", "Mau uso / aplicação", "Sem defeito aparente", "Outro"];
 const PARECER_F = ["Aguardando envio", "Enviado para indústria", "Procedente – peça", "Procedente – crédito", "Cortesia", "Improcedente – devolver ao cliente"];
 const digits = s => String(s || "").replace(/\D/g, "");
 const podeEditarGar = g => !!PERFIL && (PERFIL.admin || (!!PERFIL.filial && (!g || g.filial === PERFIL.filial)));
