@@ -6,145 +6,199 @@
 <title>Garantias Beux – vínculo de notas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="config.js"></script>
 <style>
 :root{
-  --bg:#F5F7F9; --surface:#FFFFFF; --surface-2:#ECF0F4; --ink:#1C2631; --muted:#5A6676; --line:#D6DCE3;
-  --accent:#B87A06; --accent-fill:#F2B632; --accent-ink:#2A1E00;
-  --ok:#1F6B4A; --ok-bg:#E2F2EA; --wait:#2A5F98; --wait-bg:#E3EDF8; --warn:#9A4E12; --warn-bg:#FBEBDD; --bad:#9C2F2F; --bad-bg:#F8E3E3; --gray-bg:#EEF0F3;
+  --bg:#f3f5fa; --surface:#ffffff; --surface-2:#f1f4f9; --ink:#0f172a; --muted:#8792a6; --line:#e6ebf2;
+  --side:#0c1424; --side-2:#172036; --side-ink:#c7d0e0; --side-muted:#6b7891;
+  --orange:#f26a1b; --indigo:#4f46e5; --indigo-2:#6366f1;
+  --accent:#4f46e5; --accent-fill:#4f46e5; --accent-ink:#ffffff;
+  --ok:#159a52; --ok-bg:#e6f7ee; --wait:#0b7fc0; --wait-bg:#e5f3fb; --warn:#d9820b; --warn-bg:#fff3df; --bad:#e0383e; --bad-bg:#fde9ea; --gray-bg:#f1f4f9;
   color-scheme: light;
-  box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#11171D; --surface:#19212A; --surface-2:#222C37; --ink:#E4E9EF; --muted:#98A5B3; --line:#2E3A47;
-    --accent:#E8AE3A; --accent-fill:#E8AE3A; --accent-ink:#1E1500;
-    --ok:#5BC08F; --ok-bg:#16342A; --wait:#78A9E2; --wait-bg:#172A40; --warn:#E6A064; --warn-bg:#3A2716; --bad:#E57B7B; --bad-bg:#3B1C1C; --gray-bg:#232C36;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#11171D; --surface:#19212A; --surface-2:#222C37; --ink:#E4E9EF; --muted:#98A5B3; --line:#2E3A47;
-  --accent:#E8AE3A; --accent-fill:#E8AE3A; --accent-ink:#1E1500;
-  --ok:#5BC08F; --ok-bg:#16342A; --wait:#78A9E2; --wait-bg:#172A40; --warn:#E6A064; --warn-bg:#3A2716; --bad:#E57B7B; --bad-bg:#3B1C1C; --gray-bg:#232C36;
-  color-scheme: dark;
 }
 *,*::before,*::after{box-sizing:border-box}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
-.wrap{max-width:1080px;margin:0 auto;padding:28px 20px 60px}
-header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
-h1{font-family:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif;font-weight:600;font-size:30px;line-height:1.1;margin:0;letter-spacing:-.01em}
-.sub{color:var(--muted);margin:6px 0 0;max-width:62ch}
-button{font:inherit;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px}
-button:hover{border-color:var(--muted)}
-button:focus-visible,input:focus-visible,label.drop:focus-within{outline:2px solid var(--accent);outline-offset:2px}
-.primary{background:var(--accent-fill);color:var(--accent-ink);border-color:transparent;font-weight:600}
-.primary:hover{filter:brightness(.96);border-color:transparent}
-label.drop{display:flex;align-items:center;gap:16px;border:1.5px dashed var(--line);border-radius:10px;background:var(--surface);padding:16px 18px;cursor:pointer;transition:border-color .15s,background .15s}
-label.drop.over{border-color:var(--accent);background:var(--surface-2)}
-label.drop input{position:absolute;width:1px;height:1px;opacity:0}
-.drop .glyph{flex:none;width:40px;height:40px;border-radius:8px;background:var(--surface-2);display:grid;place-items:center;color:var(--accent)}
-.drop strong{display:block}
-.drop span.hint{color:var(--muted);font-size:13.5px}
-.status{margin:10px 2px 0;font-size:14px;color:var(--muted);min-height:1.5em}
-.status.ok{color:var(--ok)} .status.err{color:var(--bad)}
-.mine{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px}
-.mine h2{margin:0 0 4px;font-size:17px;font-weight:600}
-.mine p{margin:4px 0;color:var(--muted)}
-.mine b{color:var(--ink)}
-.secnav{display:flex;gap:6px;margin:0 0 18px;border-bottom:1px solid var(--line)}
-.secnav button{border:none;border-bottom:3px solid transparent;border-radius:0;background:none;padding:10px 14px 9px;font-weight:600;color:var(--muted);font-size:15.5px}
-.secnav button[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
-.acts{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.btnlike{display:inline-block;cursor:pointer;border-radius:6px;border:1px solid var(--line);background:var(--surface);padding:7px 12px}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:4px 0 16px}
-.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
-.kpi span{display:block;font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
-.kpi b{font-size:26px;font-weight:600}
-.kpi.ok b{color:var(--ok)} .kpi.bad b{color:var(--bad)}
-.filtros{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:14px}
-.filtros label{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--muted);min-width:120px}
-.filtros label.wide{flex:1;min-width:220px}
-.filtros input,.filtros select{font:inherit;font-size:14px;padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
-table.gtab td small{color:var(--muted);font-size:12.5px}
-td.vinc{min-width:220px}
-.vchip{display:inline-block;margin:2px 4px 2px 0;padding:2px 8px;border-radius:10px;font-size:12.5px;background:var(--gray-bg);white-space:nowrap}
-.vchip.ok{background:var(--ok-bg);color:var(--ok)} .vchip.sug{background:var(--wait-bg);color:var(--wait);white-space:normal} .vchip.falta{background:none;border:1px dashed var(--line);color:var(--muted)}
-button.mini{padding:1px 7px;font-size:12px;margin-left:4px}
-.st{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12.5px;font-weight:600;white-space:nowrap;background:var(--gray-bg)}
-.st-solicitado{background:var(--warn-bg);color:var(--warn)} .st-emanalise{background:var(--wait-bg);color:var(--wait)} .st-procedente{background:var(--ok-bg);color:var(--ok)} .st-improcedente{background:var(--bad-bg);color:var(--bad)}
-dialog#dlgGar{border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);padding:0;width:min(920px,96vw);max-height:92vh}
-dialog#dlgGar::backdrop{background:rgba(10,14,20,.55)}
-#formGar{padding:22px 24px}
-#formGar h2{margin:0 0 4px;font-size:21px}
-#formGar fieldset{border:none;padding:0;margin:14px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 12px}
-#formGar legend{font-weight:600;font-size:13.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:0;margin-bottom:6px}
-#formGar label{display:flex;flex-direction:column;gap:3px;font-size:12.5px;color:var(--muted)}
-#formGar label.span2{grid-column:span 2} #formGar label.full{grid-column:1/-1}
-#formGar input,#formGar select,#formGar textarea{font:inherit;font-size:14px;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
-#formGar textarea{min-height:70px;resize:vertical}
-.formfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap}
-.formfoot .msg{color:var(--muted);font-size:13.5px}
-@media (max-width:560px){#formGar label.span2{grid-column:1/-1}}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Outfit",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 [hidden]{display:none!important}
-.userbar{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap;font-size:13.5px;color:var(--muted);margin-bottom:10px}
-.userbar button{padding:4px 10px;font-size:13.5px}
-.login{max-width:380px;margin:60px auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:26px 24px}
-.login h1{font-size:26px;margin-bottom:6px}
-.login label{display:block;font-size:13.5px;font-weight:500;margin:14px 0 4px}
-.login input{width:100%;font:inherit;padding:9px 11px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
-.login .primary{width:100%;margin-top:18px;padding:10px}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;font-weight:500}
+button:hover{border-color:#cdd5e2}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,label.drop:focus-within{outline:2px solid var(--indigo);outline-offset:2px}
+.primary{background:linear-gradient(135deg,var(--indigo),var(--indigo-2));color:#fff;border-color:transparent;font-weight:700;letter-spacing:.02em;box-shadow:0 6px 16px rgba(79,70,229,.25)}
+.primary:hover{filter:brightness(1.05);border-color:transparent}
+.dark{background:var(--side);color:#fff;border-color:transparent;font-weight:700}
+.status{margin:10px 2px 0;font-size:14px;color:var(--muted);min-height:1.4em}
+.status.ok{color:var(--ok)} .status.err{color:var(--bad)}
+.logo{display:inline-block;background:var(--orange);color:#fff;font-weight:800;font-size:14px;letter-spacing:.04em;padding:5px 12px;border-radius:999px;border:2px solid #ffd3b8}
+
+/* login */
+.login{max-width:400px;margin:9vh auto;background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:32px 28px;box-shadow:0 20px 50px rgba(15,23,42,.08)}
+.login h1{font-size:28px;font-weight:800;margin:14px 0 4px;letter-spacing:-.02em}
+.login .sub{color:var(--muted);margin:0 0 6px}
+.login label{display:block;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 6px}
+.login input{width:100%;font:inherit;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);color:var(--ink)}
+.login .primary{width:100%;margin-top:22px;padding:12px}
 .login .status{text-align:center}
-nav.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:26px 0 14px;border-bottom:1px solid var(--line)}
-nav.tabs button{border:none;border-bottom:3px solid transparent;border-radius:0;background:none;padding:9px 12px 8px;color:var(--muted);font-weight:500}
-nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
-nav.tabs .n{display:inline-block;min-width:22px;margin-left:6px;padding:0 6px;border-radius:10px;background:var(--surface-2);color:var(--ink);font-size:12.5px;text-align:center}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
-.toolbar input,.toolbar select{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
-.toolbar input{flex:1;min-width:200px}
-.list{display:flex;flex-direction:column;gap:10px}
-.alert{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--c,var(--line));border-radius:8px;padding:14px 16px}
-.alert.baixar{--c:var(--ok)} .alert.cliente{--c:var(--warn)} .alert.cobrar{--c:var(--bad)} .alert.aguardando{--c:var(--wait)} .alert.semvinculo{--c:var(--muted)} .alert.feito{opacity:.72}
-.ahead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
-.ahead h3{margin:0;font-size:16px;font-weight:600}
-.meta{color:var(--muted);font-size:13.5px}
-.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0 8px;padding:0;list-style:none}
-.chain li{display:flex;align-items:center;gap:6px}
-.chain li+li::before{content:"";width:14px;height:2px;background:var(--line);display:block}
-.step{display:inline-flex;flex-direction:column;padding:4px 9px;border-radius:6px;background:var(--surface-2);font-size:13px;line-height:1.25}
-.step b{font-weight:600;font-size:14px}
-.step small{color:var(--muted)}
-.step.missing{background:none;border:1px dashed var(--line);color:var(--muted)}
-.step.key{background:var(--c-bg,var(--surface-2))}
-.alert.baixar .step.key{--c-bg:var(--ok-bg)} .alert.cobrar .step.key{--c-bg:var(--bad-bg)} .alert.cliente .step.key{--c-bg:var(--warn-bg)} .alert.aguardando .step.key{--c-bg:var(--wait-bg)}
-.action{margin:4px 0 0;max-width:78ch}
-.extra{margin:6px 0 0;color:var(--muted);font-size:13.5px}
-.amounts{display:flex;gap:18px;flex-wrap:wrap;margin-top:8px;font-size:14px}
-.amounts span{color:var(--muted)} .amounts b{font-weight:600}
-.diff{color:var(--warn)}
-.empty{background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:28px;text-align:center;color:var(--muted)}
-.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:8px}
-table{border-collapse:collapse;width:100%;font-size:13.5px}
-th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;font-weight:600;background:var(--surface-2);white-space:nowrap}
+
+/* layout */
+.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+.side{background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;padding-top:env(safe-area-inset-top,0px)}
+.brand{display:flex;align-items:center;gap:12px;padding:20px 22px;border-bottom:1px solid rgba(255,255,255,.06)}
+.brand .painel{color:var(--side-muted);font-weight:600;font-size:12px;letter-spacing:.14em;padding-left:12px;border-left:1px solid rgba(255,255,255,.12)}
+#secnav{flex:1;padding:14px 12px;display:flex;flex-direction:column;gap:2px}
+#secnav .grp{margin:18px 10px 6px;font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--side-muted);text-transform:uppercase}
+#secnav button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;border-left:3px solid transparent;border-radius:10px;color:var(--side-ink);padding:10px 12px;font-weight:600;font-size:14.5px}
+#secnav button svg{flex:none;opacity:.8}
+#secnav button:hover{background:rgba(255,255,255,.04)}
+#secnav button[aria-current="page"]{background:var(--side-2);color:#fff;border-left-color:var(--orange)}
+.me{display:flex;align-items:center;gap:10px;padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(255,255,255,.06)}
+.me .av{flex:none;width:36px;height:36px;border-radius:10px;background:var(--side-2);color:#fff;display:grid;place-items:center;font-weight:700}
+.me .info{flex:1;min-width:0;line-height:1.25}
+.me b{display:block;color:#fff;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.me small{display:block;color:var(--side-muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em}
+.me .link{background:none;border:none;padding:0;color:#a5b4fc;font-size:12px;font-weight:500}
+.me .icon{background:none;border:none;color:var(--side-muted);padding:6px}
+.me .icon:hover{color:#fff}
+.main{min-width:0;padding:30px 34px 50px}
+
+/* cabeçalhos */
+header.top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+h1{font-weight:800;font-size:30px;line-height:1.1;margin:0;letter-spacing:-.02em}
+.kicker{margin:6px 0 0;color:var(--muted);font-size:12.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.sub{color:var(--muted);margin:8px 0 0;max-width:70ch}
+.acts{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.pill{border-radius:999px;padding:11px 22px;text-transform:uppercase;font-size:13px}
+.btnlike{display:inline-block;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--surface);padding:8px 14px;font-weight:500}
+
+/* cartões e indicadores */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:0 6px 24px rgba(15,23,42,.04)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin:0 0 22px}
+.kpi{display:flex;align-items:center;gap:16px;padding:22px 22px}
+.kpi .ic{flex:none;width:54px;height:54px;border-radius:16px;display:grid;place-items:center}
+.kpi span{display:block;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+.kpi b{font-size:28px;font-weight:800;line-height:1.1}
+.ic.c1{background:#eef0ff;color:var(--indigo)} .ic.c2{background:#fff4e2;color:#e39010} .ic.c3{background:#e6f3fc;color:#0b86c9} .ic.c4{background:#e6f7ee;color:#159a52} .ic.c5{background:#fde9ea;color:#e0383e}
+.filtros{display:flex;flex-wrap:wrap;gap:14px 18px;align-items:flex-end;padding:22px 26px;margin-bottom:22px}
+.filtros label{display:flex;flex-direction:column;gap:6px;font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;min-width:150px;flex:1}
+.filtros label.wide{flex:2.4;min-width:240px}
+.filtros input,.filtros select{font:inherit;font-size:14px;font-weight:500;text-transform:none;letter-spacing:0;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}
+
+/* tabela das garantias */
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:0 6px 24px rgba(15,23,42,.04)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;padding-top:18px;padding-bottom:18px}
+tr:last-child td{border-bottom:none}
 td.num{text-align:right;white-space:nowrap}
 td.obs{max-width:360px;color:var(--muted)}
-.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:12.5px;background:var(--gray-bg);white-space:nowrap}
+table.gtab td{padding:14px 12px}
+table.gtab tr.grow td{border-bottom:none;padding-bottom:6px}
+table.gtab tr.vrow td{padding:0 22px 14px 26px}
+.vlabel{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-right:8px}
+table.gtab tbody tr.grow:hover,table.gtab tbody tr.grow:hover+tr.vrow{background:#fafbfe}
+table.gtab th:first-child,table.gtab td:first-child{padding-left:26px}
+table.gtab th:last-child,table.gtab td:last-child{padding-right:22px}
+.gt-id b{font-weight:800}
+.gt-sm{display:block;font-size:12px;color:var(--muted);font-weight:500;white-space:nowrap}
+.gt-main{display:block;font-weight:700;font-size:13.5px;text-transform:uppercase;max-width:250px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gt-id-cli{color:var(--indigo);font-size:12px;font-weight:600}
+.gt-fil{font-size:12.5px;font-weight:700;text-transform:uppercase;color:#475569;white-space:nowrap}
+.parecer{display:flex;gap:8px;align-items:flex-start}
+.parecer i{flex:none;width:7px;height:7px;border-radius:50%;background:var(--muted);margin-top:6px}
+.parecer b{display:block;font-size:12px;font-weight:700;text-transform:uppercase;color:#64748b;max-width:170px}
+.parecer.ok b{color:var(--ok)} .parecer.ok i{background:var(--ok)} .parecer.bad b{color:var(--bad)} .parecer.bad i{background:var(--bad)}
+.rowacts{display:flex;gap:8px;justify-content:flex-end;align-items:center}
+.icbtn{width:40px;height:40px;padding:0;display:grid;place-items:center;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
+.btn-analisar{border-radius:999px;padding:9px 18px;font-size:12.5px;text-transform:uppercase;white-space:nowrap}
+.btn-ver{border-radius:999px;padding:9px 16px;font-size:12px;text-transform:uppercase;background:var(--surface-2);color:#64748b;white-space:nowrap}
+td.vinc{min-width:200px;max-width:280px}
+.vchip{display:inline-block;margin:2px 4px 2px 0;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:600;background:var(--gray-bg);color:#64748b}
+.vchip.ok{background:var(--ok-bg);color:var(--ok)} .vchip.sug{background:var(--wait-bg);color:var(--wait)} .vchip.falta{background:none;border:1px dashed #cfd7e3;color:var(--muted)}
+button.mini{padding:1px 8px;font-size:11px;margin-left:4px;border-radius:999px}
+.st{display:inline-block;padding:4px 12px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;background:var(--gray-bg)}
+.st-solicitado{background:#fff8d6;color:#b98900} .st-emanalise{background:var(--warn-bg);color:var(--warn)} .st-procedente{background:var(--ok-bg);color:var(--ok)} .st-improcedente{background:var(--bad-bg);color:var(--bad)}
+
+/* notas e baixas */
+label.drop{position:relative;display:flex;align-items:center;gap:16px;border:1.5px dashed #cfd7e3;border-radius:20px;background:var(--surface);padding:18px 22px;cursor:pointer;transition:border-color .15s,background .15s}
+label.drop.over{border-color:var(--indigo);background:#f7f7ff}
+label.drop input{position:absolute;width:1px;height:1px;opacity:0}
+.drop .glyph{flex:none;width:46px;height:46px;border-radius:14px;background:#eef0ff;display:grid;place-items:center;color:var(--indigo)}
+.drop strong{display:block;font-weight:700}
+.drop span.hint{color:var(--muted);font-size:13.5px}
+.mine{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px 22px}
+.mine h2{margin:0 0 4px;font-size:17px;font-weight:700}
+.mine p{margin:4px 0;color:var(--muted)} .mine b{color:var(--ink)}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:24px 0 16px;border-bottom:1px solid var(--line)}
+nav.tabs button{border:none;border-bottom:3px solid transparent;border-radius:0;background:none;padding:10px 12px 9px;color:var(--muted);font-weight:600}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--indigo)}
+nav.tabs .n{display:inline-block;min-width:22px;margin-left:6px;padding:0 7px;border-radius:999px;background:var(--surface-2);color:var(--ink);font-size:12px;text-align:center}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.toolbar input,.toolbar select{font:inherit;padding:10px 13px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}
+.toolbar input{flex:1;min-width:200px}
+.list{display:flex;flex-direction:column;gap:12px}
+.alert{background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--c,var(--line));border-radius:18px;padding:16px 20px;box-shadow:0 4px 16px rgba(15,23,42,.03)}
+.alert.baixar{--c:var(--ok)} .alert.cliente{--c:var(--warn)} .alert.cobrar{--c:var(--bad)} .alert.aguardando{--c:var(--wait)} .alert.semvinculo{--c:#94a3b8} .alert.feito{opacity:.7}
+.ahead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.ahead h3{margin:0;font-size:16px;font-weight:700}
+.meta{color:var(--muted);font-size:13.5px}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:12px 0 8px;padding:0;list-style:none}
+.chain li{display:flex;align-items:center;gap:6px}
+.chain li+li::before{content:"";width:14px;height:2px;background:var(--line);display:block}
+.step{display:inline-flex;flex-direction:column;padding:5px 11px;border-radius:10px;background:var(--surface-2);font-size:12.5px;line-height:1.25}
+.step b{font-weight:700;font-size:14px}
+.step small{color:var(--muted)}
+.step.missing{background:none;border:1px dashed #cfd7e3;color:var(--muted)}
+.alert.baixar .step.key{background:var(--ok-bg)} .alert.cobrar .step.key{background:var(--bad-bg)} .alert.cliente .step.key{background:var(--warn-bg)} .alert.aguardando .step.key{background:var(--wait-bg)}
+.action{margin:4px 0 0;max-width:80ch}
+.extra{margin:6px 0 0;color:var(--muted);font-size:13.5px}
+.amounts{display:flex;gap:18px;flex-wrap:wrap;margin-top:8px;font-size:14px}
+.amounts span{color:var(--muted)} .amounts b{font-weight:700}
+.diff{color:var(--warn)}
+.empty{background:var(--surface);border:1px dashed #cfd7e3;border-radius:20px;padding:30px;text-align:center;color:var(--muted)}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;background:var(--gray-bg);white-space:nowrap}
 .tag.remessa,.tag.boleto90{background:var(--wait-bg);color:var(--wait)} .tag.retorno,.tag.devRemessa{background:var(--ok-bg);color:var(--ok)} .tag.garantiaCliente{background:var(--warn-bg);color:var(--warn)}
 footer.foot{margin-top:28px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* formulário da garantia */
+dialog#dlgGar{border:none;border-radius:28px;background:var(--surface);color:var(--ink);padding:0;width:min(1000px,96vw);max-height:94vh;box-shadow:0 30px 80px rgba(15,23,42,.25)}
+dialog#dlgGar::backdrop{background:rgba(12,20,36,.55);backdrop-filter:blur(2px)}
+#formGar{padding:30px 34px}
+#formGar h2{margin:0;font-size:24px;font-weight:800;letter-spacing:-.01em}
+#formGar .kicker{margin-top:4px}
+#formGar .sub{font-size:13.5px}
+#formGar fieldset{border:none;padding:0;margin:20px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px 14px}
+#formGar legend{font-weight:700;font-size:12px;color:var(--indigo);text-transform:uppercase;letter-spacing:.12em;padding:0;margin-bottom:8px}
+#formGar label{display:flex;flex-direction:column;gap:6px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+#formGar label.span2{grid-column:span 2} #formGar label.full{grid-column:1/-1}
+#formGar input,#formGar select,#formGar textarea{font:inherit;font-size:14px;font-weight:600;text-transform:none;letter-spacing:0;padding:11px 13px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2);color:var(--ink)}
+#formGar input[name="produto"],#formGar input[name="cliente"]{background:#eef0ff;color:#3730a3}
+#formGar textarea{min-height:84px;resize:vertical;font-weight:500}
+.formfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:24px;flex-wrap:wrap}
+.formfoot .msg{color:var(--muted);font-size:13.5px}
+.formfoot .ghost{background:none;border:none;color:var(--muted);font-weight:700}
+.formfoot .dark{padding:13px 26px;border-radius:16px}
+
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center}
+  .brand{border-bottom:none;padding:14px 16px}
+  #secnav{flex-direction:row;flex-wrap:wrap;padding:6px 10px;order:3;width:100%}
+  #secnav .grp{display:none}
+  #secnav button{width:auto;border-left:none;border-bottom:3px solid transparent;border-radius:8px}
+  #secnav button[aria-current="page"]{border-bottom-color:var(--orange)}
+  .me{margin-left:auto;border-top:none;padding:10px 16px}
+  .main{padding:20px 16px 40px}
+  #formGar{padding:22px 18px} #formGar label.span2{grid-column:1/-1}
+}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
-@media (max-width:560px){h1{font-size:25px}.wrap{padding:20px 14px 48px}}
 </style>
 </head>
 <body>
 <section class="login" id="login" hidden>
+  <span class="logo">BEUX</span>
   <h1>Garantias Beux</h1>
   <p class="sub">Entre com o e-mail e a senha que Cuiabá cadastrou para você.</p>
   <form id="loginForm">
@@ -156,17 +210,31 @@ footer.foot{margin-top:28px;color:var(--muted);font-size:13px;display:flex;justi
   </form>
   <p class="status" id="loginStatus" role="status"></p>
 </section>
-<div class="wrap" id="app" hidden>
-  <div class="userbar"><span id="quem"></span><button id="trocarSenha" type="button">Trocar senha</button><button id="sair" type="button">Sair</button></div>
-  <nav class="secnav" id="secnav" aria-label="Seções"><button type="button" data-sec="garantias">Garantias</button><button type="button" data-sec="notas">Notas e baixas</button></nav>
+<div class="app" id="app" hidden>
+  <aside class="side">
+    <div class="brand"><span class="logo">BEUX</span><span class="painel">PAINEL</span></div>
+    <nav id="secnav" aria-label="Seções">
+      <p class="grp">Estoque</p>
+      <button type="button" data-sec="garantias"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Garantias</button>
+      <p class="grp">Financeiro</p>
+      <button type="button" data-sec="notas"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>Notas e baixas</button>
+    </nav>
+    <div class="me">
+      <div class="av" id="av" aria-hidden="true">?</div>
+      <div class="info"><b id="quem"></b><small id="papel"></small><button id="trocarSenha" class="link" type="button">Trocar senha</button></div>
+      <button id="sair" class="icon" type="button" title="Sair" aria-label="Sair"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg></button>
+    </div>
+  </aside>
+  <main class="main">
   <section id="secGar" hidden></section>
   <div id="secNotas">
   <header class="top">
     <div>
-      <h1>Garantias Beux</h1>
+      <h1>Notas e baixas</h1>
+      <p class="kicker">Vínculo automático das notas de garantia</p>
       <p class="sub" id="sub">Importe os XMLs das notas. O site encontra as referências nas informações complementares e na descrição dos itens, liga cada garantia às suas notas e avisa o que já pode ser baixado.</p>
     </div>
-    <button class="primary" id="export" hidden>Exportar Excel</button>
+    <button class="primary pill" id="export" hidden>Exportar Excel</button>
   </header>
 
   <label class="drop" id="drop">
@@ -190,13 +258,14 @@ footer.foot{margin-top:28px;color:var(--muted);font-size:13px;display:flex;justi
     <span id="store"></span>
     <span id="pos"></span>
   </footer>
+  </main>
 </div>
-
 
 <dialog id="dlgGar">
   <form id="formGar">
     <h2 id="dlgTitulo">Nova garantia</h2>
-    <p class="sub" style="margin:0">Campos com * são obrigatórios. Ao digitar a NF do cliente, se o XML já foi importado, cliente, CNPJ e data são preenchidos sozinhos.</p>
+    <p class="kicker">Preencha todos os campos do formulário</p>
+    <p class="sub">Campos com * são obrigatórios. Ao digitar a NF do cliente, se o XML já foi importado, cliente, CNPJ e data são preenchidos sozinhos.</p>
     <fieldset><legend>Recebimento</legend>
       <label>Filial *<select name="filial"></select></label>
       <label>Data recebimento<input type="date" name="data_recebimento"></label>
@@ -228,7 +297,7 @@ footer.foot{margin-top:28px;color:var(--muted);font-size:13px;display:flex;justi
       <label>Data do retorno<input type="date" name="data_retorno"></label>
     </fieldset>
     <div class="formfoot"><span class="msg" id="garMsg" role="status"></span>
-      <div class="acts"><button type="button" id="garApagar">Apagar</button><button type="button" id="garCancelar">Fechar</button><button type="submit" class="primary" id="garSalvar">Salvar</button></div></div>
+      <div class="acts"><button type="button" id="garApagar">Apagar</button><button type="button" class="ghost" id="garCancelar">Cancelar</button><button type="submit" class="dark" id="garSalvar">✓ Confirmar e salvar</button></div></div>
   </form>
 </dialog>
 <script>
@@ -491,7 +560,9 @@ async function entrar(u){
   PERFIL = data;
   ROLE = PERFIL.admin ? "admin" : "filial";
   $("login").hidden = true; $("app").hidden = false;
-  $("quem").textContent = `${PERFIL.email}${PERFIL.admin ? " · Cuiabá (administrador)" : (PERFIL.filial ? " · Filial " + PERFIL.filial : "") + " · " + (PERFIL.papel === "financeiro" ? "Financeiro" : "Gerente")}`;
+  $("quem").textContent = PERFIL.email;
+  $("papel").textContent = PERFIL.admin ? "Matriz · administrador" : `${PERFIL.filial ? (FIL_NOME[PERFIL.filial] || PERFIL.filial) + " · " : ""}${PERFIL.papel === "financeiro" ? "Financeiro" : "Gerente"}`;
+  $("av").textContent = (PERFIL.email || "?").charAt(0).toUpperCase();
   $("store").textContent = ROLE === "admin" ? "Painel de Cuiabá: vê as notas de todas as filiais." : "Você vê só os dados da sua filial.";
   $("drop").hidden = !podeImportar();
   render();
@@ -765,6 +836,25 @@ function chipsVinc(g, v){
   return c.join("");
 }
 
+const FIL_CURTO = { CBA: "Matriz", CG: "Campo Gde", JIP: "Ji-Paraná", SNP: "Sinop" };
+const ICO = {
+  lista: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+  caixa: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>',
+  lupa: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>',
+  ok: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg>',
+  x: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6M9 9l6 6"/></svg>',
+  lapis: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>'
+};
+function parecerTxt(g){
+  const p = g.parecer_final || "";
+  if (/^Procedente – peça/.test(p)) return ["Garantia procedente", "Pagamento em peças", "ok"];
+  if (/^Procedente – crédito/.test(p)) return ["Garantia procedente", "Pagamento em crédito", "ok"];
+  if (/^Improcedente/.test(p)) return ["Garantia improcedente", "Retorno da peça ao cliente", "bad"];
+  if (/^Cortesia/.test(p)) return ["Cortesia", "", "ok"];
+  if (/^Enviado/.test(p)) return ["Enviado para indústria", g.status === "Procedente" || g.status === "Improcedente" ? g.status : "Em análise", ""];
+  if (/^Aguardando/.test(p)) return ["Aguardando para enviar", "Em estoque, preparando envio", ""];
+  return [p || "—", "", ""];
+}
 function renderGar(){
   const el = $("secGar");
   const notes = [...NOTES.values()].map(n => ({ ...n })); analyze(notes);
@@ -779,37 +869,36 @@ function renderGar(){
   const k = s => GAR.filter(g => g.status === s).length;
   const fils = PERFIL && PERFIL.admin ? ["CBA", "CG", "JIP", "SNP"] : [];
   const opt = (arr, sel, vazio) => (vazio ? `<option value="">${vazio}</option>` : "") + arr.map(x => Array.isArray(x) ? `<option value="${x[0]}" ${x[0] === sel ? "selected" : ""}>${esc(x[1])}</option>` : `<option ${x === sel ? "selected" : ""}>${esc(x)}</option>`).join("");
+  const kpi = (cls, ic, rot, n) => `<div class="card kpi"><div class="ic ${cls}">${ICO[ic]}</div><div><span>${rot}</span><b>${n}</b></div></div>`;
   el.innerHTML = `
-  <header class="top"><div><h1>Monitoramento de garantias</h1><p class="sub">Cadastro das garantias recebidas dos clientes. Cada garantia é ligada automaticamente às notas e aos títulos do painel de notas e baixas.</p></div>
-    <div class="acts">${PERFIL && PERFIL.admin ? `<button type="button" id="garModelo">Modelo de planilha</button><label class="btnlike">Importar planilha<input type="file" id="garImport" accept=".xlsx,.xls,.csv" hidden></label>` : ""}${podeEditarGar() ? `<button type="button" class="primary" id="garNova">+ Nova garantia</button>` : ""}</div></header>
+  <header class="top"><div><h1>Monitoramento de Garantias</h1><p class="kicker">Gestão de fluxo e análises técnicas</p></div>
+    <div class="acts">${PERFIL && PERFIL.admin ? `<button type="button" id="garModelo">Modelo de planilha</button><label class="btnlike">Importar planilha<input type="file" id="garImport" accept=".xlsx,.xls,.csv" hidden></label>` : ""}${podeEditarGar() ? `<button type="button" class="primary pill" id="garNova">+ Nova garantia</button>` : ""}</div></header>
   <div class="kpis">
-    <div class="kpi"><span>Total</span><b>${GAR.length}</b></div>
-    <div class="kpi"><span>Solicitado</span><b>${k("Solicitado")}</b></div>
-    <div class="kpi"><span>Em análise</span><b>${k("Em análise")}</b></div>
-    <div class="kpi ok"><span>Procedentes</span><b>${k("Procedente")}</b></div>
-    <div class="kpi bad"><span>Improcedentes</span><b>${k("Improcedente")}</b></div>
+    ${kpi("c1", "lista", "Total pedidos", GAR.length)}${kpi("c2", "caixa", "Solicitado", k("Solicitado"))}${kpi("c3", "lupa", "Em análise", k("Em análise"))}${kpi("c4", "ok", "Procedentes", k("Procedente"))}${kpi("c5", "x", "Improcedentes", k("Improcedente"))}
   </div>
-  <div class="filtros">
+  <div class="card filtros">
     <label>Nota fiscal<input id="fNf" value="${esc(gf.nf)}" placeholder="Nº NF ou #ID"></label>
-    <label class="wide">Cliente, produto ou código<input id="fCli" value="${esc(gf.cli)}" placeholder="Razão social, CNPJ, cód. Movere…"></label>
+    <label class="wide">Cliente (nome ou ID)<input id="fCli" value="${esc(gf.cli)}" placeholder="Razão social, CNPJ, produto ou código…"></label>
     <label>Status<select id="fSt">${opt(STATUS_G, gf.status, "Todos")}</select></label>
     ${fils.length ? `<label>Filial<select id="fFil">${opt(fils.map(f => [f, FIL_NOME[f]]), gf.fil, "Todas")}</select></label>` : ""}
     <label>Pgto antecipado<select id="fAnt">${opt([["true", "Sim"], ["false", "Não"]], gf.antec, "Ambos")}</select></label>
-    <label>Recebida de<input type="date" id="fDi" value="${esc(gf.di)}"></label>
-    <label>até<input type="date" id="fDf" value="${esc(gf.df)}"></label>
+    <label>Data inicial<input type="date" id="fDi" value="${esc(gf.di)}"></label>
+    <label>Data final<input type="date" id="fDf" value="${esc(gf.df)}"></label>
   </div>
-  ${list.length ? `<div class="tablewrap"><table class="gtab"><thead><tr><th>#ID / data</th><th>Status</th><th>Produto</th><th>Cliente</th><th>Filial</th><th>NF original</th><th>Parecer final</th><th>Corrente da garantia</th><th></th></tr></thead><tbody>${list.map(g => {
-    const v = vinculos(g, notes);
-    return `<tr><td><b>#${String(g.id).padStart(3, "0")}</b><br><small>${dt(g.data_recebimento)}</small></td>
-      <td><span class="st st-${norm(g.status).replace(/\s/g, "")}">${esc(g.status)}</span></td>
-      <td><b>${esc(g.produto)}</b><br><small>${g.cod_movere ? "Movere " + esc(g.cod_movere) : ""}${g.cod_peca ? " · Fab. " + esc(g.cod_peca) : ""}${+g.quantidade !== 1 ? " · " + (+g.quantidade) + " un" : ""}</small></td>
-      <td><b>${esc(g.cliente)}</b><br><small>${g.cliente_cod ? "ID " + esc(g.cliente_cod) : ""}${g.cnpj ? " · " + esc(g.cnpj) : ""}</small></td>
-      <td>${esc(g.filial)}</td>
-      <td>NF ${esc(g.nf_cliente || "S/N")}<br><small>Antecipado: ${g.pgto_antecipado ? "sim" : "não"}${g.nf_60dias ? " · NF 60 dias" + (g.nf_60dias_numero ? " " + esc(g.nf_60dias_numero) : "") : ""}</small></td>
-      <td>${esc(g.parecer_final || "—")}${g.parecer_visual ? `<br><small>${esc(g.parecer_visual)}</small>` : ""}</td>
-      <td class="vinc">${chipsVinc(g, v)}</td>
-      <td>${podeEditarGar(g) ? `<button type="button" data-edit="${g.id}">Editar</button>` : `<button type="button" data-edit="${g.id}">Ver</button>`}</td></tr>`;
-  }).join("")}</tbody></table></div>` : `<div class="empty">${GAR.length ? "Nenhuma garantia com esses filtros." : "Nenhuma garantia cadastrada ainda. Clique em “+ Nova garantia” para começar, ou importe a planilha das garantias antigas."}</div>`}`;
+  ${list.length ? `<div class="tablewrap"><table class="gtab"><thead><tr><th>#ID / Data</th><th>Status</th><th>Produto</th><th>Cliente / Fantasia</th><th>Filial</th><th>NF original</th><th>Parecer final</th><th style="text-align:right">Ações</th></tr></thead><tbody>${list.map(g => {
+    const v = vinculos(g, notes), [p1, p2, pc] = parecerTxt(g), fim = g.status === "Procedente" || g.status === "Improcedente";
+    const pode = podeEditarGar(g);
+    return `<tr class="grow">
+      <td class="gt-id"><b>#${String(g.id).padStart(3, "0")}</b><span class="gt-sm">${dt(g.data_recebimento)}</span></td>
+      <td><span class="st st-${norm(g.status).replace(/\s/g, "").toLowerCase()}">${esc(g.status)}</span></td>
+      <td><span class="gt-main" title="${esc(g.produto)}">${esc(g.produto)}</span><span class="gt-sm">${g.cod_peca ? "FAB: " + esc(g.cod_peca) : ""}${g.cod_movere ? " · Movere " + esc(g.cod_movere) : ""}${+g.quantidade !== 1 ? " · " + (+g.quantidade) + " un" : ""}</span></td>
+      <td><span class="gt-main" title="${esc(g.cliente)}">${esc(g.cliente)}</span>${g.cliente_cod ? `<span class="gt-id-cli">ID: ${esc(g.cliente_cod)}</span>` : ""}</td>
+      <td class="gt-fil">${esc(FIL_CURTO[g.filial] || g.filial)}</td>
+      <td><b>NF ${esc(g.nf_cliente || "S/N")}</b><span class="gt-sm">ANTECIPADO: ${g.pgto_antecipado ? "SIM" : "NÃO"}${g.nf_60dias ? " · NF 60 DIAS" + (g.nf_60dias_numero ? " " + esc(g.nf_60dias_numero) : "") : ""}</span></td>
+      <td><div class="parecer ${pc}"><i></i><div><b>${esc(p1)}</b>${p2 ? `<span class="gt-sm">${esc(p2)}</span>` : ""}</div></div></td>
+      <td><div class="rowacts">${pode ? `<button type="button" class="icbtn" data-edit="${g.id}" title="Editar" aria-label="Editar garantia #${g.id}">${ICO.lapis}</button>` : ""}${fim || !pode ? `<button type="button" class="btn-ver" data-edit="${g.id}">Ver detalhes</button>` : `<button type="button" class="primary btn-analisar" data-edit="${g.id}">Analisar</button>`}</div></td></tr>
+      <tr class="vrow"><td colspan="8"><span class="vlabel">Corrente</span>${chipsVinc(g, v)}</td></tr>`;
+  }).join("")}</tbody></table></div>` : `<div class="empty">${GAR.length ? "Nenhuma garantia com esses filtros." : "Nenhuma garantia cadastrada ainda. Clique em “+ Nova garantia” para começar."}</div>`}`;
   const bind = (id, key, ev = "change") => { const x = $(id); if (x) x.addEventListener(ev, e => { gf[key] = e.target.value; renderGar(); if (ev === "input"){ const y = $(id); y.focus(); y.setSelectionRange(y.value.length, y.value.length); } }); };
   bind("fNf", "nf", "input"); bind("fCli", "cli", "input"); bind("fSt", "status"); bind("fFil", "fil"); bind("fAnt", "antec"); bind("fDi", "di"); bind("fDf", "df");
   const nv = $("garNova"); if (nv) nv.onclick = () => abrirGar(null);
@@ -837,7 +926,7 @@ function abrirGar(g){
   const d = $("dlgGar"), f = $("formGar");
   const novo = !g, pode = podeEditarGar(g);
   g = g || { filial: PERFIL.admin ? "" : PERFIL.filial, status: "Solicitado", quantidade: 1, data_recebimento: new Date().toISOString().slice(0, 10), nf_60dias: false, pgto_antecipado: false, parecer_final: "Aguardando envio" };
-  $("dlgTitulo").textContent = novo ? "Nova garantia" : `Garantia #${String(g.id).padStart(3, "0")}`;
+  $("dlgTitulo").textContent = novo ? "Nova garantia" : `${pode ? "Editar" : "Detalhes da"} garantia #${String(g.id).padStart(3, "0")}`;
   const filSel = f.elements.filial;
   filSel.innerHTML = `<option value="">Escolher…</option>` + ["CBA", "CG", "JIP", "SNP"].map(x => `<option value="${x}">${FIL_NOME[x]}</option>`).join("");
   f.elements.status.innerHTML = STATUS_G.map(x => `<option>${x}</option>`).join("");
