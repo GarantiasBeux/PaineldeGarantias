@@ -163,8 +163,8 @@ nav.tabs .n{display:inline-block;min-width:22px;margin-left:6px;padding:0 7px;bo
 footer.foot{margin-top:28px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
 
-.acwrap{position:relative}
-#formGar label em{font-style:normal;font-weight:500;text-transform:none;letter-spacing:0;color:#a3acbd}
+.acbox{position:relative;display:flex;flex-direction:column}
+#formGar label em{font-style:normal;font-weight:500;font-size:11.5px;text-transform:none;letter-spacing:0;color:#a3acbd;margin-top:-2px}
 .ac{position:absolute;left:0;right:0;top:100%;margin-top:4px;z-index:20;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 34px rgba(15,23,42,.16);max-height:320px;overflow:auto;text-transform:none;letter-spacing:0}
 .ac-it{padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--line)}
 .ac-it:last-child{border-bottom:none}
@@ -184,8 +184,8 @@ dialog#dlgGar::backdrop{background:rgba(12,20,36,.55);backdrop-filter:blur(2px)}
 #formGar h2{margin:0;font-size:24px;font-weight:800;letter-spacing:-.01em}
 #formGar .kicker{margin-top:4px}
 #formGar .sub{font-size:13.5px}
-#formGar fieldset{border:none;padding:0;margin:20px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px 14px}
-#formGar legend{font-weight:700;font-size:12px;color:var(--indigo);text-transform:uppercase;letter-spacing:.12em;padding:0;margin-bottom:8px}
+#formGar fieldset{border:none;padding:0;margin:26px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px 14px;align-items:start}
+#formGar legend{display:block;width:100%;font-weight:800;font-size:12.5px;color:var(--orange);text-transform:uppercase;letter-spacing:.14em;padding:0 0 7px;margin-bottom:14px;border-bottom:3px solid #1e3a8a}
 #formGar label{display:flex;flex-direction:column;gap:6px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 #formGar label.span2{grid-column:span 2} #formGar label.full{grid-column:1/-1}
 #formGar input,#formGar select,#formGar textarea{font:inherit;font-size:14px;font-weight:600;text-transform:none;letter-spacing:0;padding:11px 13px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2);color:var(--ink)}
@@ -296,15 +296,15 @@ dialog#dlgGar::backdrop{background:rgba(12,20,36,.55);backdrop-filter:blur(2px)}
       <label>Pgto antecipado?<select name="pgto_antecipado"><option value="false">Não</option><option value="true">Sim</option></select></label>
     </fieldset>
     <fieldset><legend>Peça</legend>
-      <label class="span2 acwrap">Produto * <em>busca pelo cód. Movere, cód. de fabricação ou descrição</em><input name="produto" required placeholder="Ex.: 3312, 9050-300L ou cabeçote axial"></label>
-      <label class="acwrap">Cód. Movere<input name="cod_movere"></label>
-      <label class="acwrap">Cód. peça (fabricante)<input name="cod_peca"></label>
+      <label class="span2">Produto *<span class="acbox"><input name="produto" required placeholder="Ex.: 3312, 9050-300L ou cabeçote axial"></span><em>Busca pelo cód. Movere, cód. de fabricação ou descrição</em></label>
+      <label>Cód. Movere<span class="acbox"><input name="cod_movere"></span></label>
+      <label>Cód. peça (fabricante)<span class="acbox"><input name="cod_peca"></span></label>
       <label>Quantidade<input name="quantidade" inputmode="decimal"></label>
     </fieldset>
     <fieldset><legend>Cliente</legend>
-      <label class="acwrap">Cód. cliente<input name="cliente_cod"></label>
-      <label class="acwrap">CNPJ<input name="cnpj"></label>
-      <label class="span2 acwrap">Razão social / fantasia * <em>busca pelo código, nome ou CNPJ</em><input name="cliente" required placeholder="Ex.: 40029, Adolfo ou 34.151.188"></label>
+      <label>Cód. cliente<span class="acbox"><input name="cliente_cod"></span></label>
+      <label>CNPJ<span class="acbox"><input name="cnpj"></span></label>
+      <label class="span2">Razão social / fantasia *<span class="acbox"><input name="cliente" required placeholder="Ex.: 40029, Adolfo ou 34.151.188"></span><em>Busca pelo código, nome ou CNPJ</em></label>
       <label class="full">Defeito apresentado pelo cliente<textarea name="defeito"></textarea></label>
     </fieldset>
     <fieldset><legend>Indústria</legend>
