@@ -162,6 +162,21 @@ nav.tabs .n{display:inline-block;min-width:22px;margin-left:6px;padding:0 7px;bo
 .tag.remessa,.tag.boleto90{background:var(--wait-bg);color:var(--wait)} .tag.retorno,.tag.devRemessa{background:var(--ok-bg);color:var(--ok)} .tag.garantiaCliente{background:var(--warn-bg);color:var(--warn)}
 footer.foot{margin-top:28px;color:var(--muted);font-size:13px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 
+
+.acwrap{position:relative}
+#formGar label em{font-style:normal;font-weight:500;text-transform:none;letter-spacing:0;color:#a3acbd}
+.ac{position:absolute;left:0;right:0;top:100%;margin-top:4px;z-index:20;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 34px rgba(15,23,42,.16);max-height:320px;overflow:auto;text-transform:none;letter-spacing:0}
+.ac-it{padding:9px 13px;cursor:pointer;border-bottom:1px solid var(--line)}
+.ac-it:last-child{border-bottom:none}
+.ac-it b{display:block;font-size:13.5px;font-weight:600;color:var(--ink)}
+.ac-it small{display:block;font-size:12px;font-weight:500;color:var(--muted)}
+.ac-it.on,.ac-it:hover{background:#eef0ff}
+.ac-vazio{padding:10px 13px;font-size:13px;font-weight:500;color:var(--muted)}
+.cadgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.cadbox{padding:22px 24px}
+.cadbox h2{margin:0 0 6px;font-size:18px;font-weight:700}
+.cadbox p{color:var(--muted);margin:0 0 16px}
+.btnfile{display:inline-block;cursor:pointer}
 /* formulário da garantia */
 dialog#dlgGar{border:none;border-radius:28px;background:var(--surface);color:var(--ink);padding:0;width:min(1000px,96vw);max-height:94vh;box-shadow:0 30px 80px rgba(15,23,42,.25)}
 dialog#dlgGar::backdrop{background:rgba(12,20,36,.55);backdrop-filter:blur(2px)}
@@ -218,6 +233,8 @@ dialog#dlgGar::backdrop{background:rgba(12,20,36,.55);backdrop-filter:blur(2px)}
       <button type="button" data-sec="garantias"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Garantias</button>
       <p class="grp">Financeiro</p>
       <button type="button" data-sec="notas"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>Notas e baixas</button>
+      <p class="grp" id="grpCad" hidden>Administração</p>
+      <button type="button" data-sec="cadastros" id="navCad" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>Cadastros</button>
     </nav>
     <div class="me">
       <div class="av" id="av" aria-hidden="true">?</div>
@@ -227,6 +244,7 @@ dialog#dlgGar::backdrop{background:rgba(12,20,36,.55);backdrop-filter:blur(2px)}
   </aside>
   <main class="main">
   <section id="secGar" hidden></section>
+  <section id="secCad" hidden></section>
   <div id="secNotas">
   <header class="top">
     <div>
@@ -278,15 +296,15 @@ dialog#dlgGar::backdrop{background:rgba(12,20,36,.55);backdrop-filter:blur(2px)}
       <label>Pgto antecipado?<select name="pgto_antecipado"><option value="false">Não</option><option value="true">Sim</option></select></label>
     </fieldset>
     <fieldset><legend>Peça</legend>
-      <label class="span2">Produto *<input name="produto" required></label>
-      <label>Cód. Movere<input name="cod_movere"></label>
-      <label>Cód. peça (fabricante)<input name="cod_peca"></label>
+      <label class="span2 acwrap">Produto * <em>busca pelo cód. Movere, cód. de fabricação ou descrição</em><input name="produto" required placeholder="Ex.: 3312, 9050-300L ou cabeçote axial"></label>
+      <label class="acwrap">Cód. Movere<input name="cod_movere"></label>
+      <label class="acwrap">Cód. peça (fabricante)<input name="cod_peca"></label>
       <label>Quantidade<input name="quantidade" inputmode="decimal"></label>
     </fieldset>
     <fieldset><legend>Cliente</legend>
-      <label>Cód. cliente<input name="cliente_cod"></label>
-      <label>CNPJ<input name="cnpj"></label>
-      <label class="span2">Razão social / fantasia *<input name="cliente" required></label>
+      <label class="acwrap">Cód. cliente<input name="cliente_cod"></label>
+      <label class="acwrap">CNPJ<input name="cnpj"></label>
+      <label class="span2 acwrap">Razão social / fantasia * <em>busca pelo código, nome ou CNPJ</em><input name="cliente" required placeholder="Ex.: 40029, Adolfo ou 34.151.188"></label>
       <label class="full">Defeito apresentado pelo cliente<textarea name="defeito"></textarea></label>
     </fieldset>
     <fieldset><legend>Indústria</legend>
@@ -789,7 +807,7 @@ function card(a, readOnly){
 }
 
 /* ---------- registro de garantias (substitui o “Monitoramento de Garantias”) ---------- */
-let GAR = [], secao = (location.hash === "#notas") ? "notas" : "garantias";
+let GAR = [], secao = ({ "#notas": "notas", "#cadastros": "cadastros" })[location.hash] || "garantias";
 const gf = { nf: "", cli: "", status: "", fil: "", antec: "", di: "", df: "" };
 const FIL_NOME = { CBA: "Matriz (Cuiabá)", CG: "Campo Grande", JIP: "Ji-Paraná", SNP: "Sinop" };
 const STATUS_G = ["Solicitado", "Em análise", "Procedente", "Improcedente"];
@@ -799,8 +817,11 @@ const digits = s => String(s || "").replace(/\D/g, "");
 const podeEditarGar = g => !!PERFIL && (PERFIL.admin || (!!PERFIL.filial && (!g || g.filial === PERFIL.filial)));
 
 function render(){
+  if (secao === "cadastros" && !(PERFIL && PERFIL.admin)) secao = "garantias";
   const g = secao === "garantias";
-  $("secGar").hidden = !g; $("secNotas").hidden = g;
+  $("secGar").hidden = !g; $("secNotas").hidden = secao !== "notas"; $("secCad").hidden = secao !== "cadastros";
+  if (PERFIL){ $("navCad").hidden = !PERFIL.admin; $("grpCad").hidden = !PERFIL.admin; }
+  if (secao === "cadastros"){ document.querySelectorAll("#secnav [data-sec]").forEach(b => b.setAttribute("aria-current", b.dataset.sec === secao ? "page" : "false")); renderCad(); if (CAD.pecas === null) contarCadastros(); return; }
   document.querySelectorAll("#secnav [data-sec]").forEach(b => b.setAttribute("aria-current", b.dataset.sec === secao ? "page" : "false"));
   if (g) renderGar(); else renderNotas();
 }
@@ -1037,6 +1058,148 @@ async function importarPlanilhaGar(file){
     await carregarGar();
     alert(`${out.length} garantias importadas.`);
   } catch(e){ alert("Não foi possível importar a planilha: " + (e.message || e)); }
+}
+
+/* ---------- cadastros de peças e clientes (busca automática no formulário) ---------- */
+const semAspas = s => String(s || "").replace(/["(),\\]/g, " ").replace(/\s+/g, " ").trim();
+async function buscarPecas(q){
+  q = semAspas(q); if (q.length < 2) return [];
+  const v = `"%${q}%"`;
+  const filtro = /^\d+$/.test(q) ? `cod_movere.eq.${q},cod_fab.ilike.${v},cod_original.ilike.${v}` : `cod_fab.ilike.${v},cod_original.ilike.${v},descricao.ilike.${v}`;
+  const { data, error } = await sb.from("pecas").select("cod_movere,cod_fab,descricao,marca").or(filtro).order("descricao").limit(12);
+  return error ? [] : data;
+}
+async function buscarClientes(q){
+  q = semAspas(q); if (q.length < 2) return [];
+  const d = q.replace(/\D/g, "");
+  let filtro;
+  if (d.length >= 8 && d.length === q.replace(/[.\-\/\s]/g, "").length) filtro = `cnpj_num.like."${d}%"`;
+  else if (/^\d+$/.test(q)) filtro = `cod.eq.${q},cnpj_num.like."${q}%"`;
+  else filtro = `nome.ilike."%${q}%",fantasia.ilike."%${q}%"`;
+  const { data, error } = await sb.from("clientes").select("cod,nome,fantasia,cnpj,cidade").or(filtro).order("nome").limit(12);
+  return error ? [] : data;
+}
+function autocomplete(input, buscar, linha, escolher){
+  const box = document.createElement("div"); box.className = "ac"; box.hidden = true; box.setAttribute("role", "listbox");
+  input.parentNode.appendChild(box); input.setAttribute("autocomplete", "off");
+  let itens = [], sel = -1, timer = null, seq = 0;
+  const fechar = () => { box.hidden = true; sel = -1; };
+  const desenhar = () => { box.innerHTML = itens.map((it, i) => `<div class="ac-it${i === sel ? " on" : ""}" data-i="${i}" role="option">${linha(it)}</div>`).join("") || `<div class="ac-vazio">Nada encontrado no cadastro.</div>`; box.hidden = false; };
+  input.addEventListener("input", () => {
+    clearTimeout(timer);
+    const q = input.value; if (semAspas(q).length < 2){ fechar(); return; }
+    timer = setTimeout(async () => { const my = ++seq; const r = await buscar(q); if (my !== seq) return; itens = r; sel = -1; desenhar(); }, 250);
+  });
+  input.addEventListener("keydown", e => {
+    if (box.hidden) return;
+    if (e.key === "ArrowDown"){ e.preventDefault(); sel = Math.min(itens.length - 1, sel + 1); desenhar(); }
+    else if (e.key === "ArrowUp"){ e.preventDefault(); sel = Math.max(0, sel - 1); desenhar(); }
+    else if (e.key === "Enter" && sel >= 0){ e.preventDefault(); escolher(itens[sel]); fechar(); }
+    else if (e.key === "Escape"){ e.stopPropagation(); e.preventDefault(); fechar(); }
+  });
+  box.addEventListener("mousedown", e => { const it = e.target.closest("[data-i]"); if (it){ e.preventDefault(); escolher(itens[+it.dataset.i]); fechar(); } });
+  input.addEventListener("blur", () => setTimeout(fechar, 150));
+}
+(function ligarBuscas(){
+  const f = $("formGar"), E = n => f.elements[n];
+  const pecaPick = p => { E("produto").value = p.descricao; E("cod_movere").value = p.cod_movere; if (p.cod_fab) E("cod_peca").value = p.cod_fab; $("garMsg").textContent = `Peça ${p.cod_movere} preenchida pelo cadastro.`; };
+  const cliPick = c => { E("cliente").value = c.nome; E("cliente_cod").value = c.cod; if (c.cnpj) E("cnpj").value = c.cnpj; $("garMsg").textContent = `Cliente ${c.cod} preenchido pelo cadastro.`; };
+  const linhaPeca = p => `<b>${esc(p.descricao)}</b><small>Movere ${esc(p.cod_movere)}${p.cod_fab ? " · Fab. " + esc(p.cod_fab) : ""}${p.marca ? " · " + esc(p.marca) : ""}</small>`;
+  const linhaCli = c => `<b>${esc(c.nome)}</b><small>Cód. ${esc(c.cod)}${c.cnpj ? " · " + esc(c.cnpj) : ""}${c.cidade ? " · " + esc(c.cidade) : ""}</small>`;
+  for (const n of ["produto", "cod_movere", "cod_peca"]) autocomplete(E(n), buscarPecas, linhaPeca, pecaPick);
+  for (const n of ["cliente", "cliente_cod", "cnpj"]) autocomplete(E(n), buscarClientes, linhaCli, cliPick);
+})();
+
+let CAD = { pecas: null, clientes: null };
+async function contarCadastros(){
+  const c = async t => { const { count } = await sb.from(t).select("*", { count: "exact", head: true }); return count ?? 0; };
+  try { CAD = { pecas: await c("pecas"), clientes: await c("clientes") }; } catch(e){}
+  if (secao === "cadastros") renderCad();
+}
+function renderCad(){
+  const el = $("secCad");
+  el.innerHTML = `<header class="top"><div><h1>Cadastros</h1><p class="kicker">Peças e clientes para a busca automática</p>
+    <p class="sub">No formulário de garantia, ao digitar o cód. Movere, o código de fabricação ou parte da descrição, o site traz a peça. No cliente, basta o código, o nome ou o CNPJ. Aqui você atualiza esses cadastros sempre que quiser.</p></div></header>
+  <div class="kpis"><div class="card kpi"><div class="ic c1">${ICO.lista}</div><div><span>Peças cadastradas</span><b>${CAD.pecas ?? "…"}</b></div></div>
+  <div class="card kpi"><div class="ic c4">${ICO.ok}</div><div><span>Clientes cadastrados</span><b>${CAD.clientes ?? "…"}</b></div></div></div>
+  <div class="cadgrid">
+    <div class="card cadbox"><h2>Cadastro de peças</h2>
+      <p>Use o Excel do <b>Analytics → 6 - Giro Estoque / Ofertas / Liquidações</b> (o mesmo arquivo que tem as colunas Cód Item, Cód Fabricação e Item). Pode exportar com todos os grupos de itens.</p>
+      <label class="primary pill btnfile">Atualizar peças<input type="file" id="cadPecas" accept=".xlsx,.xls,.csv" hidden></label></div>
+    <div class="card cadbox"><h2>Cadastro de clientes</h2>
+      <p>Use o Excel do <b>Analytics → B.I Filiais - Clientes</b> (aba com Cód cliente e Nome Cliente). Se o arquivo não tiver CNPJ, o site completa com o CNPJ das notas importadas e das garantias. Para trazer também clientes que não compram há mais de um ano, aumente o período de datas no Analytics antes de exportar.</p>
+      <label class="primary pill btnfile">Atualizar clientes<input type="file" id="cadClientes" accept=".xlsx,.xls,.csv" hidden></label></div>
+  </div>
+  <p class="status" id="cadStatus" role="status"></p>`;
+  $("cadPecas").onchange = e => { if (e.target.files[0]) importarCadastro(e.target.files[0], "pecas"); e.target.value = ""; };
+  $("cadClientes").onchange = e => { if (e.target.files[0]) importarCadastro(e.target.files[0], "clientes"); e.target.value = ""; };
+}
+function cadStatus(t, cls){ const s = $("cadStatus"); if (s){ s.textContent = t; s.className = "status" + (cls ? " " + cls : ""); } }
+async function importarCadastro(file, tipo){
+  try {
+    cadStatus("Lendo o arquivo…");
+    const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
+    const linhas = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: "", raw: false });
+    const achaCab = re => linhas.findIndex(r => r.some(c => re.test(norm(c))));
+    let rows = [];
+    if (tipo === "pecas"){
+      const hi = achaCab(/^COD ITEM$|^COD\.? MOVERE$|^CODIGO MOVERE$/);
+      if (hi < 0) throw new Error("não achei a coluna “Cód Item”. Confira se é o Excel do Giro de Estoque do Analytics.");
+      const H = linhas[hi].map(norm), col = re => H.findIndex(h => re.test(h));
+      const c = { cod: col(/^COD ITEM$|^COD\.? MOVERE$|^CODIGO MOVERE$/), fab: col(/^COD\.? FABRICACAO$/), ori: col(/^COD\.? ORIGINAL$/), item: col(/^ITEM$|^DESCRICAO$/), apl: col(/^APLICACAO$/), marca: col(/^MARCA$/), forn: col(/^FORNECEDOR/), grupo: col(/^GRUPO ITENS$/) };
+      const vistos = new Map();
+      for (const r of linhas.slice(hi + 1)){
+        const cod = String(r[c.cod] || "").trim(); if (!cod || vistos.has(cod)) continue;
+        const desc = String(r[c.item] || "").trim(); if (!desc) continue;
+        const g = i => i >= 0 ? (String(r[i] || "").trim() || null) : null;
+        vistos.set(cod, { cod_movere: cod, cod_fab: g(c.fab), cod_original: g(c.ori), descricao: desc, aplicacao: g(c.apl) && g(c.apl).slice(0, 300), marca: g(c.marca), fornecedor: g(c.forn), grupo: g(c.grupo), atualizado_em: new Date().toISOString() });
+      }
+      rows = [...vistos.values()];
+    } else {
+      // Procura, em todas as abas, a linha de cabeçalho com o código e o nome do cliente (CNPJ é opcional)
+      let L = null, hi = -1;
+      for (const nome of wb.SheetNames){
+        const ls = XLSX.utils.sheet_to_json(wb.Sheets[nome], { header: 1, defval: "", raw: false });
+        const i = ls.findIndex(r => { const h = r.map(norm); return h.some(x => /^(COD|CODIGO)\.? ?(DO )?(CLIENTE|CLIFOR)$|^IDCLIFOR$/.test(x)) && h.some(x => /RAZAO|^NOME( CLIENTE)?$|^CLIENTE$/.test(x)); });
+        if (i >= 0){ L = ls; hi = i; break; }
+      }
+      if (!L) throw new Error("não achei uma aba com as colunas “Cód cliente” e “Nome Cliente”.");
+      const H = L[hi].map(norm), col = re => H.findIndex(h => re.test(h));
+      const c = { cod: col(/^(COD|CODIGO)\.? ?(DO )?(CLIENTE|CLIFOR)$|^IDCLIFOR$/), nome: col(/RAZAO|^NOME( CLIENTE)?$|^CLIENTE$/), fant: col(/FANTASIA/), cnpj: col(/CNPJ|CPF/), cid: col(/^CIDADE|MUNICIPIO/), uf: col(/^UF$/) };
+      // CNPJ conhecido pelas notas importadas e pelas garantias, para completar quem vier sem CNPJ
+      const cnpjPorNome = new Map();
+      for (const n of NOTES.values()){ if (isBeux(n.emitCNPJ)){ if (n.destNome && n.destDoc) cnpjPorNome.set(norm(n.destNome), n.destDoc); } else if (n.emitNome && n.emitCNPJ) cnpjPorNome.set(norm(n.emitNome), n.emitCNPJ); }
+      for (const g of GAR) if (g.cliente && g.cnpj) cnpjPorNome.set(norm(g.cliente), g.cnpj);
+      const vistos = new Map();
+      for (const r of L.slice(hi + 1)){
+        const cod = String(r[c.cod] || "").trim(), nome = String(r[c.nome] || "").trim();
+        if (!/^\d+$/.test(cod) || !nome || vistos.has(cod)) continue;
+        const g = i => i >= 0 ? (String(r[i] || "").trim() || null) : null;
+        const row = { cod, nome, atualizado_em: new Date().toISOString() };
+        if (c.fant >= 0) row.fantasia = g(c.fant);
+        const cid = g(c.cid), uf = g(c.uf); row.cidade = cid ? (uf ? `${cid}/${uf}` : cid) : null;
+        const cnpj = c.cnpj >= 0 ? g(c.cnpj) : cnpjPorNome.get(norm(nome));
+        if (cnpj) row.cnpj = cnpj;
+        vistos.set(cod, row);
+      }
+      rows = [...vistos.values()];
+    }
+    if (!rows.length) throw new Error("nenhuma linha válida encontrada.");
+    const tabela = tipo === "pecas" ? "pecas" : "clientes", chave = tipo === "pecas" ? "cod_movere" : "cod";
+    // Linhas sem CNPJ vão num lote separado, para não apagar o CNPJ que já estiver cadastrado
+    if (tipo === "clientes") rows.sort((a, b) => ("cnpj" in a ? 0 : 1) - ("cnpj" in b ? 0 : 1));
+    const lotes = [];
+    for (const r of rows){ const k = Object.keys(r).sort().join(","); let l = lotes[lotes.length - 1]; if (!l || l.k !== k || l.r.length >= 500){ l = { k, r: [] }; lotes.push(l); } l.r.push(r); }
+    let feitos = 0;
+    for (const l of lotes){
+      feitos += l.r.length;
+      cadStatus(`Salvando ${feitos} de ${rows.length} ${tipo === "pecas" ? "peças" : "clientes"}…`);
+      const { error } = await sb.from(tabela).upsert(l.r, { onConflict: chave });
+      if (error) throw error;
+    }
+    await contarCadastros();
+    cadStatus(`${rows.length} ${tipo === "pecas" ? "peças" : "clientes"} atualizados.`, "ok");
+  } catch(e){ cadStatus("Não foi possível importar: " + (e.message || e), "err"); }
 }
 
 $("tabs").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (b){ tab = b.dataset.tab; render(); } });
