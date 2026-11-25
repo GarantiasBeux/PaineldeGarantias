@@ -213,7 +213,18 @@ dialog#dlgGar::backdrop{background:rgba(12,20,36,.55);backdrop-filter:blur(2px)}
 #formGar label{display:flex;flex-direction:column;gap:6px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 #formGar label.span2{grid-column:span 2} #formGar label.full{grid-column:1/-1}
 #formGar input,#formGar select,#formGar textarea{font:inherit;font-size:14px;font-weight:600;text-transform:none;letter-spacing:0;padding:11px 13px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2);color:var(--ink)}
-#formGar input[name="produto"],#formGar input[name="cliente"]{background:#eef0ff;color:#3730a3}
+#formGar input[data-k="produto"],#formGar input[name="cliente"]{background:#eef0ff;color:#3730a3}
+#garItens{grid-column:1/-1;display:flex;flex-direction:column;gap:10px}
+.item{display:grid;grid-template-columns:28px 2.2fr 1fr 1.2fr .6fr 40px;gap:10px 12px;align-items:end}
+.item .num{align-self:center;margin-top:18px;width:26px;height:26px;border-radius:50%;background:#eef0ff;color:var(--indigo);font-weight:800;font-size:12px;display:grid;place-items:center}
+.item label{display:flex;flex-direction:column;gap:6px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.item .rm{width:40px;height:44px;padding:0;border-radius:12px;font-size:20px;line-height:1;color:var(--bad);background:var(--surface-2)}
+.item .rm[hidden]{display:block!important;visibility:hidden}
+.itensfoot{grid-column:1/-1;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.itensfoot em{font-style:normal;font-size:11.5px;color:#a3acbd}
+.additem{border:1.5px dashed #c7cdf7;background:#f7f7ff;color:var(--indigo);font-weight:700;border-radius:12px}
+.gt-mais{display:inline-block;margin-top:3px;padding:1px 9px;border-radius:999px;background:#eef0ff;color:var(--indigo);font-size:11.5px;font-weight:700;cursor:help}
+@media (max-width:700px){.item{grid-template-columns:28px 1fr 1fr 40px}.item label:nth-of-type(1){grid-column:2/-2}}
 #formGar textarea{min-height:84px;resize:vertical;font-weight:500}
 .formfoot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:24px;flex-wrap:wrap}
 .formfoot .msg{color:var(--muted);font-size:13.5px}
@@ -321,11 +332,9 @@ dialog#dlgGar::backdrop{background:rgba(12,20,36,.55);backdrop-filter:blur(2px)}
       <label>Nº da NF 60 dias<input name="nf_60dias_numero"></label>
       <label>Pgto antecipado?<select name="pgto_antecipado"><option value="false">Não</option><option value="true">Sim</option></select></label>
     </fieldset>
-    <fieldset><legend>Peça</legend>
-      <label class="span2">Produto *<span class="acbox"><input name="produto" required placeholder="Ex.: 3312, 9050-300L ou cabeçote axial"></span><em>Busca pelo cód. Movere, cód. de fabricação ou descrição</em></label>
-      <label>Cód. Movere<span class="acbox"><input name="cod_movere"></span></label>
-      <label>Cód. peça (fabricante)<span class="acbox"><input name="cod_peca"></span></label>
-      <label>Quantidade<input name="quantidade" inputmode="decimal"></label>
+    <fieldset><legend>Peças</legend>
+      <div class="itens" id="garItens"></div>
+      <div class="itensfoot"><button type="button" class="additem" id="garAddItem">+ Adicionar outra peça da mesma nota</button><em>Busca pelo cód. Movere, cód. de fabricação ou descrição</em></div>
     </fieldset>
     <fieldset><legend>Cliente</legend>
       <label>Cód. cliente<span class="acbox"><input name="cliente_cod"></span></label>
@@ -890,7 +899,8 @@ function render(){
 $("secnav").addEventListener("click", e => { const b = e.target.closest("[data-sec]"); if (!b) return; secao = b.dataset.sec; history.replaceState(null, "", "#" + secao); render(); });
 
 function vinculos(g, notes){
-  const fil = g.filial, nf = digits(g.nf_cliente), cod = String(g.cod_movere || "").trim(), cnpj = digits(g.cnpj);
+  const fil = g.filial, nf = digits(g.nf_cliente), cnpj = digits(g.cnpj);
+  const cods = new Set(itensDe(g).map(i => String(i.cod_movere || "").trim()).filter(Boolean)), cod = cods.size;
   const out = {};
   if (nf){
     out.entrada = notes.find(n => !isBeux(n.emitCNPJ) && n._fil === fil && String(n.nNF) === nf && (!cnpj || digits(n.emitCNPJ) === cnpj));
@@ -898,11 +908,11 @@ function vinculos(g, notes){
   }
   const rems = notes.filter(n => n._kind === "remessa" && n._fil === fil);
   if (g.nf_envio) out.remessa = rems.find(n => String(n.nNF) === digits(g.nf_envio)) || { nNF: g.nf_envio, dh: g.data_envio, virtual: true };
-  else if (cod) out.remessaSug = rems.filter(n => n.itens.some(i => String(i.c) === cod) && (!g.data_recebimento || n.dh >= g.data_recebimento)).sort((a, b) => a.dh.localeCompare(b.dh))[0];
+  else if (cod) out.remessaSug = rems.filter(n => n.itens.some(i => cods.has(String(i.c))) && (!g.data_recebimento || n.dh >= g.data_recebimento)).sort((a, b) => a.dh.localeCompare(b.dh))[0];
   const rem = out.remessa && !out.remessa.virtual ? out.remessa : null;
   if (rem) out.retorno = notes.find(n => (n._kind === "retorno" || n._kind === "devRemessa") && n._tg.some(x => x.t && x.t.chave === rem.chave));
   if (!out.retorno && g.nf_retorno) out.retorno = { nNF: g.nf_retorno, dh: g.data_retorno, virtual: true };
-  if (cnpj && cod) out.boleto = notes.find(b => b._kind === "boleto90" && digits(b.destDoc) === cnpj && b.itens.some(i => String(i.c) === cod));
+  if (cnpj && cod) out.boleto = notes.find(b => b._kind === "boleto90" && digits(b.destDoc) === cnpj && b.itens.some(i => cods.has(String(i.c))));
   else if (g.nf_60dias_numero) out.boleto = notes.find(b => b._kind === "boleto90" && String(b.nNF) === digits(g.nf_60dias_numero));
   if (out.remessa){ const t = titulo(fil, digits(out.remessa.nNF), "Receber"); if (t) out.receber = t; }
   return out;
@@ -944,7 +954,7 @@ function renderGar(){
   const toDate = s => s || "";
   const list = GAR.filter(g =>
     (!gf.nf || digits(g.nf_cliente).includes(digits(gf.nf)) || String(g.nf_envio || "").includes(gf.nf) || String(g.id) === gf.nf.replace("#", "")) &&
-    (!gf.cli || norm([g.cliente, g.cliente_cod, g.cnpj, g.produto, g.cod_movere, g.cod_peca].join(" ")).includes(norm(gf.cli))) &&
+    (!gf.cli || norm([g.cliente, g.cliente_cod, g.cnpj, ...itensDe(g).map(i => [i.produto, i.cod_movere, i.cod_peca].join(" "))].join(" ")).includes(norm(gf.cli))) &&
     (!gf.status || g.status === gf.status) && (!gf.fil || g.filial === gf.fil) &&
     (!gf.antec || String(!!g.pgto_antecipado) === gf.antec) &&
     (!gf.di || toDate(g.data_recebimento) >= gf.di) && (!gf.df || toDate(g.data_recebimento) <= gf.df)
@@ -974,7 +984,7 @@ function renderGar(){
     return `<tr class="grow">
       <td class="gt-id"><b>#${String(g.id).padStart(3, "0")}</b><span class="gt-sm">${dt(g.data_recebimento)}</span></td>
       <td><span class="st st-${norm(g.status).replace(/\s/g, "").toLowerCase()}">${esc(g.status)}</span></td>
-      <td><span class="gt-main" title="${esc(g.produto)}">${esc(g.produto)}</span><span class="gt-sm">${g.cod_peca ? "FAB: " + esc(g.cod_peca) : ""}${g.cod_movere ? " · Movere " + esc(g.cod_movere) : ""}${+g.quantidade !== 1 ? " · " + (+g.quantidade) + " un" : ""}</span></td>
+      <td>${(() => { const its = itensDe(g), i0 = its[0] || {}; return `<span class="gt-main" title="${esc(i0.produto)}">${esc(i0.produto)}</span><span class="gt-sm">${i0.cod_peca ? "FAB: " + esc(i0.cod_peca) : ""}${i0.cod_movere ? " · Movere " + esc(i0.cod_movere) : ""}${+i0.quantidade !== 1 ? " · " + (+i0.quantidade) + " un" : ""}</span>${its.length > 1 ? `<span class="gt-mais" title="${esc(its.map((x, k) => (k + 1) + ". " + x.produto + " (" + (+x.quantidade || 1) + " un)").join("\n"))}">+${its.length - 1} peça${its.length > 2 ? "s" : ""} · ${its.reduce((a, x) => a + (+x.quantidade || 1), 0)} un no total</span>` : ""}`; })()}</td>
       <td><span class="gt-main" title="${esc(g.cliente)}">${esc(g.cliente)}</span>${g.cliente_cod ? `<span class="gt-id-cli">ID: ${esc(g.cliente_cod)}</span>` : ""}</td>
       <td class="gt-fil">${esc(FIL_CURTO[g.filial] || g.filial)}</td>
       <td><b>NF ${esc(g.nf_cliente || "S/N")}</b><span class="gt-sm">ANTECIPADO: ${g.pgto_antecipado ? "SIM" : "NÃO"}${g.nf_60dias ? " · NF 60 DIAS" + (g.nf_60dias_numero ? " " + esc(g.nf_60dias_numero) : "") : ""}</span></td>
@@ -1004,7 +1014,40 @@ async function carregarGar(){
 }
 
 /* ---------- formulário ---------- */
-const CAMPOS = ["filial","data_recebimento","status","parecer_visual","nf_cliente","data_nf","nf_60dias","nf_60dias_numero","pgto_antecipado","produto","cod_movere","cod_peca","quantidade","cliente_cod","cnpj","cliente","defeito","parecer_final","nf_envio","data_envio","nf_retorno","data_retorno"];
+const CAMPOS = ["filial","data_recebimento","status","parecer_visual","nf_cliente","data_nf","nf_60dias","nf_60dias_numero","pgto_antecipado","cliente_cod","cnpj","cliente","defeito","parecer_final","nf_envio","data_envio","nf_retorno","data_retorno"];
+/* lista de peças da garantia */
+const itensDe = g => (Array.isArray(g.itens) && g.itens.length) ? g.itens : [{ produto: g.produto || "", cod_movere: g.cod_movere || "", cod_peca: g.cod_peca || "", quantidade: g.quantidade || 1 }];
+const linhaPecaHtml = p => `<b>${esc(p.descricao)}</b><small>Movere ${esc(p.cod_movere)}${p.cod_fab ? " · Fab. " + esc(p.cod_fab) : ""}${p.marca ? " · " + esc(p.marca) : ""}</small>`;
+function numerarItens(){
+  const rows = [...$("garItens").querySelectorAll(".item")];
+  rows.forEach((r, i) => { r.querySelector(".num").textContent = i + 1; r.querySelector(".rm").hidden = rows.length === 1; });
+}
+function addItem(it, pode){
+  it = it || { produto: "", cod_movere: "", cod_peca: "", quantidade: 1 };
+  const row = document.createElement("div"); row.className = "item";
+  row.innerHTML = `<span class="num"></span>
+    <label>Produto *<span class="acbox"><input data-k="produto" placeholder="Ex.: 3312, 9050-300L ou cabeçote axial"></span></label>
+    <label>Cód. Movere<span class="acbox"><input data-k="cod_movere"></span></label>
+    <label>Cód. peça (fabricante)<span class="acbox"><input data-k="cod_peca"></span></label>
+    <label>Qtd<input data-k="quantidade" inputmode="decimal"></label>
+    <button type="button" class="rm" title="Remover esta peça" aria-label="Remover esta peça">×</button>`;
+  const I = k => row.querySelector(`[data-k="${k}"]`);
+  I("produto").value = it.produto || ""; I("cod_movere").value = it.cod_movere || ""; I("cod_peca").value = it.cod_peca || ""; I("quantidade").value = it.quantidade == null ? 1 : +it.quantidade;
+  const pick = p => { I("produto").value = p.descricao; I("cod_movere").value = p.cod_movere; if (p.cod_fab) I("cod_peca").value = p.cod_fab; $("garMsg").textContent = `Peça ${p.cod_movere} preenchida pelo cadastro.`; I("quantidade").focus(); I("quantidade").select(); };
+  for (const k of ["produto", "cod_movere", "cod_peca"]) autocomplete(I(k), buscarPecas, linhaPecaHtml, pick);
+  row.querySelector(".rm").onclick = () => { row.remove(); numerarItens(); };
+  row.querySelectorAll("input,button").forEach(el => el.disabled = pode === false);
+  $("garItens").appendChild(row); numerarItens();
+  return row;
+}
+function lerItens(){
+  return [...$("garItens").querySelectorAll(".item")].map(r => {
+    const v = k => (r.querySelector(`[data-k="${k}"]`).value || "").trim();
+    return { produto: v("produto"), cod_movere: v("cod_movere") || null, cod_peca: v("cod_peca") || null, quantidade: Number(v("quantidade").replace(",", ".")) || 1 };
+  }).filter(x => x.produto || x.cod_movere || x.cod_peca);
+}
+$("garAddItem").addEventListener("click", () => { const r = addItem(null, true); r.querySelector('[data-k="produto"]').focus(); });
+
 function abrirGar(g){
   const d = $("dlgGar"), f = $("formGar");
   const novo = !g, pode = podeEditarGar(g);
@@ -1023,6 +1066,7 @@ function abrirGar(g){
   }
   filSel.disabled = !PERFIL.admin;
   [...f.elements].forEach(el => { if (el.name) el.disabled = !pode || (el.name === "filial" && !PERFIL.admin); });
+  $("garItens").innerHTML = ""; itensDe(g).forEach(it => addItem(it, pode)); $("garAddItem").hidden = !pode;
   $("garSalvar").hidden = !pode;
   $("garApagar").hidden = !(PERFIL.admin && !novo);
   f.dataset.id = novo ? "" : g.id;
@@ -1038,8 +1082,9 @@ $("formGar").elements.nf_cliente.addEventListener("change", () => {
   if (!f.elements.cliente.value) f.elements.cliente.value = n.emitNome || "";
   if (!f.elements.cnpj.value) f.elements.cnpj.value = n.emitCNPJ || "";
   if (!f.elements.data_nf.value) f.elements.data_nf.value = n.dh || "";
-  if (!f.elements.produto.value && n.itens.length === 1) f.elements.produto.value = n.itens[0].d;
-  $("garMsg").textContent = `Dados preenchidos a partir da NF ${nf} já importada.`;
+  // Se a lista ainda está vazia, traz os itens da nota do cliente (um por linha)
+  if (!lerItens().length && n.itens.length){ $("garItens").innerHTML = ""; n.itens.slice(0, 30).forEach(i => addItem({ produto: i.d, cod_movere: "", cod_peca: "", quantidade: i.q || 1 }, true)); }
+  $("garMsg").textContent = `Dados preenchidos a partir da NF ${nf} já importada${n.itens.length > 1 ? ` (${n.itens.length} itens)` : ""}.`;
 });
 $("formGar").addEventListener("submit", async e => {
   e.preventDefault();
@@ -1054,7 +1099,10 @@ $("formGar").addEventListener("submit", async e => {
   }
   if (!PERFIL.admin) row.filial = PERFIL.filial;
   if (!row.filial){ $("garMsg").textContent = "Escolha a filial."; return; }
-  if (!row.produto || !row.cliente){ $("garMsg").textContent = "Preencha o produto e o cliente."; return; }
+  const itens = lerItens();
+  if (itens.some(i => !i.produto)){ $("garMsg").textContent = "Toda peça da lista precisa do produto (ou remova a linha vazia)."; return; }
+  if (!itens.length || !row.cliente){ $("garMsg").textContent = "Preencha ao menos uma peça e o cliente."; return; }
+  Object.assign(row, { itens, produto: itens[0].produto, cod_movere: itens[0].cod_movere, cod_peca: itens[0].cod_peca, quantidade: itens[0].quantidade });
   $("garMsg").textContent = "Salvando…";
   const id = f.dataset.id;
   const { error } = id ? await sb.from("garantias").update(row).eq("id", +id) : await sb.from("garantias").insert({ ...row, criado_por: USER.id });
@@ -1129,7 +1177,9 @@ async function buscarPecas(q){
   const v = `"%${q}%"`;
   const filtro = /^\d+$/.test(q) ? `cod_movere.eq.${q},cod_fab.ilike.${v},cod_original.ilike.${v}` : `cod_fab.ilike.${v},cod_original.ilike.${v},descricao.ilike.${v}`;
   const { data, error } = await sb.from("pecas").select("cod_movere,cod_fab,descricao,marca").or(filtro).order("descricao").limit(12);
-  return error ? [] : data;
+  if (error) return { erro: "Erro na busca de peças: " + error.message };
+  if (!data.length){ const { count } = await sb.from("pecas").select("*", { count: "exact", head: true }); if (!count) return { erro: "O cadastro de peças está vazio. Cuiabá precisa carregar o Excel em Cadastros → Atualizar peças." }; }
+  return data;
 }
 async function buscarClientes(q){
   q = semAspas(q); if (q.length < 2) return [];
@@ -1139,18 +1189,20 @@ async function buscarClientes(q){
   else if (/^\d+$/.test(q)) filtro = `cod.eq.${q},cnpj_num.like."${q}%"`;
   else filtro = `nome.ilike."%${q}%",fantasia.ilike."%${q}%"`;
   const { data, error } = await sb.from("clientes").select("cod,nome,fantasia,cnpj,cidade").or(filtro).order("nome").limit(12);
-  return error ? [] : data;
+  if (error) return { erro: "Erro na busca de clientes: " + error.message };
+  return data;
 }
 function autocomplete(input, buscar, linha, escolher){
   const box = document.createElement("div"); box.className = "ac"; box.hidden = true; box.setAttribute("role", "listbox");
   input.parentNode.appendChild(box); input.setAttribute("autocomplete", "off");
   let itens = [], sel = -1, timer = null, seq = 0;
   const fechar = () => { box.hidden = true; sel = -1; };
-  const desenhar = () => { box.innerHTML = itens.map((it, i) => `<div class="ac-it${i === sel ? " on" : ""}" data-i="${i}" role="option">${linha(it)}</div>`).join("") || `<div class="ac-vazio">Nada encontrado no cadastro.</div>`; box.hidden = false; };
+  let aviso = "";
+  const desenhar = () => { box.innerHTML = aviso ? `<div class="ac-vazio">${esc(aviso)}</div>` : (itens.map((it, i) => `<div class="ac-it${i === sel ? " on" : ""}" data-i="${i}" role="option">${linha(it)}</div>`).join("") || `<div class="ac-vazio">Nada encontrado no cadastro.</div>`); box.hidden = false; };
   input.addEventListener("input", () => {
     clearTimeout(timer);
     const q = input.value; if (semAspas(q).length < 2){ fechar(); return; }
-    timer = setTimeout(async () => { const my = ++seq; const r = await buscar(q); if (my !== seq) return; itens = r; sel = -1; desenhar(); }, 250);
+    timer = setTimeout(async () => { const my = ++seq; const r = await buscar(q); if (my !== seq) return; aviso = r && r.erro ? r.erro : ""; itens = Array.isArray(r) ? r : []; sel = -1; desenhar(); }, 250);
   });
   input.addEventListener("keydown", e => {
     if (box.hidden) return;
@@ -1164,11 +1216,8 @@ function autocomplete(input, buscar, linha, escolher){
 }
 (function ligarBuscas(){
   const f = $("formGar"), E = n => f.elements[n];
-  const pecaPick = p => { E("produto").value = p.descricao; E("cod_movere").value = p.cod_movere; if (p.cod_fab) E("cod_peca").value = p.cod_fab; $("garMsg").textContent = `Peça ${p.cod_movere} preenchida pelo cadastro.`; };
   const cliPick = c => { E("cliente").value = c.nome; E("cliente_cod").value = c.cod; if (c.cnpj) E("cnpj").value = c.cnpj; $("garMsg").textContent = `Cliente ${c.cod} preenchido pelo cadastro.`; };
-  const linhaPeca = p => `<b>${esc(p.descricao)}</b><small>Movere ${esc(p.cod_movere)}${p.cod_fab ? " · Fab. " + esc(p.cod_fab) : ""}${p.marca ? " · " + esc(p.marca) : ""}</small>`;
   const linhaCli = c => `<b>${esc(c.nome)}</b><small>Cód. ${esc(c.cod)}${c.cnpj ? " · " + esc(c.cnpj) : ""}${c.cidade ? " · " + esc(c.cidade) : ""}</small>`;
-  for (const n of ["produto", "cod_movere", "cod_peca"]) autocomplete(E(n), buscarPecas, linhaPeca, pecaPick);
   for (const n of ["cliente", "cliente_cod", "cnpj"]) autocomplete(E(n), buscarClientes, linhaCli, cliPick);
 })();
 
