@@ -177,6 +177,30 @@ footer.foot{margin-top:28px;color:var(--muted);font-size:13px;display:flex;justi
 .cadbox h2{margin:0 0 6px;font-size:18px;font-weight:700}
 .cadbox p{color:var(--muted);margin:0 0 16px}
 .btnfile{display:inline-block;cursor:pointer}
+
+.ctls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.btn-mail{padding:8px 14px;border-radius:10px}
+.tag.pedida{background:#e5f3fb;color:#0b7fc0}
+dialog#dlgMail{border:none;border-radius:28px;background:var(--surface);color:var(--ink);padding:0;width:min(760px,96vw);max-height:94vh;box-shadow:0 30px 80px rgba(15,23,42,.25)}
+dialog#dlgMail::backdrop{background:rgba(12,20,36,.55)}
+#formMail{padding:28px 32px}
+#formMail h2{margin:0;font-size:24px;font-weight:800}
+#formMail .kicker{margin-top:4px}
+.mailgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+.mailgrid label{display:flex;flex-direction:column;gap:6px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.mailgrid label.full{grid-column:1/-1}
+.mailgrid input,.mailgrid textarea{font:inherit;font-size:14px;font-weight:500;text-transform:none;letter-spacing:0;padding:11px 13px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2);color:var(--ink)}
+.mailgrid textarea{resize:vertical;line-height:1.5}
+@media (max-width:600px){.mailgrid{grid-template-columns:1fr}}
+
+.navn{margin-left:auto;background:var(--orange);color:#fff;border-radius:999px;font-size:11.5px;font-weight:700;padding:0 7px;line-height:18px}
+.navn:empty{display:none}
+.tag.problema{background:var(--bad-bg);color:var(--bad)} .tag.ok{background:var(--ok-bg);color:var(--ok)}
+.resp{margin:8px 0 0;font-size:13.5px;font-weight:600}
+.resp.confirmada{color:var(--ok)} .resp.problema{color:var(--bad)}
+.bxcorpo{white-space:pre-wrap;font:inherit;font-size:14px;background:var(--surface-2);border-radius:12px;padding:12px 14px;margin:12px 0 0}
+.bxobs{display:flex;flex-direction:column;gap:6px;margin-top:12px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.bxobs textarea{font:inherit;font-size:14px;font-weight:500;text-transform:none;letter-spacing:0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);resize:vertical}
 /* formulário da garantia */
 dialog#dlgGar{border:none;border-radius:28px;background:var(--surface);color:var(--ink);padding:0;width:min(1000px,96vw);max-height:94vh;box-shadow:0 30px 80px rgba(15,23,42,.25)}
 dialog#dlgGar::backdrop{background:rgba(12,20,36,.55);backdrop-filter:blur(2px)}
@@ -229,10 +253,11 @@ dialog#dlgGar::backdrop{background:rgba(12,20,36,.55);backdrop-filter:blur(2px)}
   <aside class="side">
     <div class="brand"><span class="logo">BEUX</span><span class="painel">PAINEL</span></div>
     <nav id="secnav" aria-label="Seções">
-      <p class="grp">Estoque</p>
-      <button type="button" data-sec="garantias"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Garantias</button>
+      <p class="grp" id="grpGar">Estoque</p>
+      <button type="button" data-sec="garantias" id="navGar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Garantias</button>
       <p class="grp">Financeiro</p>
-      <button type="button" data-sec="notas"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>Notas e baixas</button>
+      <button type="button" data-sec="baixas" id="navBaixas" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="m4 7 8 6 8-6"/></svg>Baixas solicitadas<span class="navn" id="navBaixasN"></span></button>
+      <button type="button" data-sec="notas" id="navNotas"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>Notas e baixas</button>
       <p class="grp" id="grpCad" hidden>Administração</p>
       <button type="button" data-sec="cadastros" id="navCad" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg>Cadastros</button>
     </nav>
@@ -245,6 +270,7 @@ dialog#dlgGar::backdrop{background:rgba(12,20,36,.55);backdrop-filter:blur(2px)}
   <main class="main">
   <section id="secGar" hidden></section>
   <section id="secCad" hidden></section>
+  <section id="secBaixas" hidden></section>
   <div id="secNotas">
   <header class="top">
     <div>
@@ -316,6 +342,22 @@ dialog#dlgGar::backdrop{background:rgba(12,20,36,.55);backdrop-filter:blur(2px)}
     </fieldset>
     <div class="formfoot"><span class="msg" id="garMsg" role="status"></span>
       <div class="acts"><button type="button" id="garApagar">Apagar</button><button type="button" class="ghost" id="garCancelar">Cancelar</button><button type="submit" class="dark" id="garSalvar">✓ Confirmar e salvar</button></div></div>
+  </form>
+</dialog>
+
+<dialog id="dlgMail">
+  <form id="formMail">
+    <h2 id="mailTitulo">Pedir baixa por e-mail</h2>
+    <p class="kicker" id="mailResumo"></p>
+    <p class="sub">Confira e ajuste o texto. Ao clicar em <b>Abrir no e-mail</b>, o seu programa de e-mail (Outlook) abre com a mensagem pronta; o envio é feito por lá.</p>
+    <div class="mailgrid">
+      <label>Para<input name="para" type="text"></label>
+      <label>Cc (fica salvo para as próximas)<input name="cc" type="text" placeholder="ex.: danielle@beux.com.br"></label>
+      <label class="full">Assunto<input name="assunto" type="text"></label>
+      <label class="full">Mensagem<textarea name="corpo" rows="10"></textarea></label>
+    </div>
+    <div class="formfoot"><span class="msg" id="mailMsg" role="status"></span>
+      <div class="acts"><button type="button" class="ghost" id="mailCancelar">Cancelar</button><button type="button" id="mailCopiar">Copiar texto</button><button type="submit" class="dark">✉ Abrir no e-mail</button></div></div>
   </form>
 </dialog>
 <script>
@@ -455,7 +497,8 @@ function analyze(notes){
       action: isDev ? `Baixar o receber ${nums} com a nota de devolução ${n.nNF}.` : parcial ? `Abater do receber ${nums} o pagar ${n.nNF}. O restante da remessa continua aguardando a fábrica.` : `Compensar o receber ${nums} com o pagar ${n.nNF}.`,
       extra: extras,
       amounts: parcial ? [["Remessa", ms[0].vNF], ["Este retorno", n.vNF]] : [["A receber", rec], [isDev ? "Devolução" : "A pagar", n.vNF]],
-      diff: parcial ? 0 : Math.round((rec - n.vNF) * 100) / 100, sort: n.dh });
+      diff: parcial ? 0 : Math.round((rec - n.vNF) * 100) / 100, sort: n.dh,
+      mail: { pagar: n.nNF, valor: n.vNF, parc: isDev ? "DEVOLUÇÃO" : n.emitNome, receber: ms.map(m => m.nNF), parcial } });
   }
   for (const n of notes){
     if (n._kind !== "garantiaCliente") continue;
@@ -469,6 +512,7 @@ function analyze(notes){
       alerts.push({ id: "G:" + n.chave, cat: "baixar", tipo: "Garantia do cliente com boleto", fil: n._fil, parc: n.emitNome,
         steps: [venda ? stepOf(venda, "Venda") : null, stepOf(bol, "Boleto 90 dias"), stepOf(n, "Garantia do cliente", 1)].filter(Boolean),
         action: `Compensar o receber ${bol.nNF} (boleto 90 dias) com o pagar ${n.nNF} (garantia do cliente).`,
+        mail: { pagar: n.nNF, valor: n.vNF, parc: n.emitNome, receber: [bol.nNF], parcial: false },
         extra: n._refs.some(r => r.src === "item") ? "Referência encontrada na descrição do item." : "",
         amounts: [["A receber", tr ? tr[4] : bol.vNF], ["A pagar", n.vNF]], diff: Math.round(((tr ? tr[4] : bol.vNF) - n.vNF) * 100) / 100, sort: n.dh });
     } else {
@@ -515,6 +559,7 @@ function analyze(notes){
       alerts.push({ id: "S:" + n.chave, cat: g ? "baixar" : (n._refs.length ? "aguardando" : "semvinculo"), tipo: "Saída de garantia ao cliente", fil: n._fil, parc: n.destNome,
         steps: [g ? stepOf(g.t, "Garantia do cliente") : null, stepOf(n, "Saída ao cliente", 1)].filter(Boolean),
         action: g ? `Compensar o receber ${n.nNF} com o pagar ${g.t.nNF}.` : (n._refs.length ? `Cita a NF ${n._refs.map(r => r.n).join(", ")}, ainda não importada.` : "Nota de garantia sem referência: conferir."),
+        mail: g ? { pagar: g.t.nNF, valor: g.t.vNF, parc: g.t.emitNome, receber: [n.nNF], parcial: false } : null,
         amounts: [["Valor", n.vNF]], sort: n.dh });
     }
   }
@@ -534,7 +579,7 @@ const podeImportar = () => !!PERFIL && (PERFIL.admin || (PERFIL.papel === "finan
 // As regras de acesso ficam no banco: mesmo mexendo no site, ninguém lê dados de outra filial.
 const CFG = window.GARANTIAS_CONFIG || {};
 let sb = null, USER = null, PERFIL = null, ROLE = "carregando";
-let NOTES = new Map(), ACOES = {}, PERFIS = [], IMPORTS = [], POS = "";
+let NOTES = new Map(), ACOES = {}, PERFIS = [], IMPORTS = [], POS = "", ALERTAS = new Map(), SOLIC = [];
 let tab = "baixar", filtro = "", filFiltro = "";
 const clean = n => { const o = {}; for (const k in n) if (k[0] !== "_") o[k] = n[k]; return o; };
 const safeId = id => id.replace(/[^A-Za-z0-9_-]/g, "_");
@@ -576,10 +621,11 @@ async function entrar(u){
     return;
   }
   PERFIL = data;
-  ROLE = PERFIL.admin ? "admin" : "filial";
+  ROLE = PERFIL.admin ? "admin" : PERFIL.papel === "baixas" ? "baixas" : "filial";
+  if (ROLE === "baixas") secao = "baixas";
   $("login").hidden = true; $("app").hidden = false;
   $("quem").textContent = PERFIL.email;
-  $("papel").textContent = PERFIL.admin ? "Matriz · administrador" : `${PERFIL.filial ? (FIL_NOME[PERFIL.filial] || PERFIL.filial) + " · " : ""}${PERFIL.papel === "financeiro" ? "Financeiro" : "Gerente"}`;
+  $("papel").textContent = PERFIL.admin ? "Matriz · administrador" : PERFIL.papel === "baixas" ? "Baixas · confere e confirma" : `${PERFIL.filial ? (FIL_NOME[PERFIL.filial] || PERFIL.filial) + " · " : ""}${PERFIL.papel === "financeiro" ? "Financeiro" : "Gerente"}`;
   $("av").textContent = (PERFIL.email || "?").charAt(0).toUpperCase();
   $("store").textContent = ROLE === "admin" ? "Painel de Cuiabá: vê as notas de todas as filiais." : "Você vê só os dados da sua filial.";
   $("drop").hidden = !podeImportar();
@@ -592,17 +638,18 @@ async function carregar(){
     const [notas, tits, acoes, aj, imps] = await Promise.all([
       fetchAll("notas", "chave,dados", "chave"),
       fetchAll("titulos", "filial,parceiro,lado,titulo,saldo,portador", "id"),
-      fetchAll("acoes", "id,status", "id"),
+      fetchAll("acoes", "id,status,em", "id"),
       sb.from("ajustes").select("chave,valor"),
       fetchAll("importacoes", "user_id,filial,arquivos,notas,em", "em")
     ]);
     NOTES = new Map(notas.map(r => [r.chave, r.dados]));
     TIT = tits.map(t => [t.filial, t.parceiro, t.lado, String(t.titulo), Number(t.saldo), t.portador]);
-    ACOES = {}; acoes.forEach(a => { ACOES[a.id] = { status: a.status }; });
+    ACOES = {}; acoes.forEach(a => { ACOES[a.id] = { status: a.status, em: a.em }; });
     POS = (((aj.data || []).find(x => x.chave === "posicao_titulos")) || {}).valor || "";
     IMPORTS = imps;
     if (ROLE === "admin") PERFIS = await fetchAll("perfis", "user_id,email,filial,admin,papel,criado_em", "criado_em");
     try { GAR = await fetchAll("garantias", "*", "id"); } catch(e){ GAR = []; }
+    try { SOLIC = await fetchAll("solicitacoes_baixa", "*", "id"); } catch(e){ SOLIC = []; }
     setStatus("");
   } catch(e){ setStatus("Não foi possível carregar os dados: " + (e.message || e), "err"); }
   render();
@@ -755,6 +802,7 @@ function renderNotas(){
   let alerts = analyze(notes).sort((a, b) => (b.sort || "").localeCompare(a.sort || ""));
   alerts.forEach(a => { const st = ACOES[safeId(a.id)]; a.feito = st && st.status === "feito"; });
   if (F) alerts = alerts.filter(a => a.fil === F);
+  ALERTAS = new Map(alerts.map(a => [a.id, a]));
   const visNotes = F ? notes.filter(n => n._fil === F) : notes;
   const cats = ROLE === "admin" ? CATS : CATS.filter(([k]) => k !== "filiais");
   const counts = {}; cats.forEach(([k]) => counts[k] = 0);
@@ -769,7 +817,7 @@ function renderNotas(){
     const opts = sel => ["", "CBA", "CG", "JIP", "SNP"].map(f => `<option value="${f}" ${f === (sel || "") ? "selected" : ""}>${f || "Escolher…"}</option>`).join("");
     const lastImp = id => { const xs = IMPORTS.filter(x => x.user_id === id); return xs.length ? xs[xs.length - 1] : null; };
     const totImp = id => IMPORTS.filter(x => x.user_id === id).reduce((s, x) => s + (x.notas || 0), 0);
-    const papelOpts = sel => [["gerente","Gerente (só consulta)"],["financeiro","Financeiro (importa)"]].map(([v, l]) => `<option value="${v}" ${v === (sel || "gerente") ? "selected" : ""}>${l}</option>`).join("");
+    const papelOpts = sel => [["gerente","Gerente (só consulta)"],["financeiro","Financeiro (importa)"],["baixas","Baixas (confere e confirma)"]].map(([v, l]) => `<option value="${v}" ${v === (sel || "gerente") ? "selected" : ""}>${l}</option>`).join("");
     view.innerHTML = `<p class="extra" style="margin:0 0 10px">Os usuários são criados no Supabase (Authentication → Users). Depois, escolha aqui a filial e o papel de cada um. O financeiro importa os XMLs e consulta a filial; o gerente só consulta e acompanha.</p>` +
       `<div class="tablewrap"><table><thead><tr><th>Usuário</th><th>Filial</th><th>Papel</th><th>Última importação</th><th>Notas enviadas</th></tr></thead><tbody>${PERFIS.map(p => { const li = lastImp(p.user_id); return `<tr><td>${esc(p.email)}${p.admin ? " <span class=\"tag\">administrador</span>" : ""}</td><td>${p.admin ? esc(p.filial || "CBA") : `<select data-user="${esc(p.user_id)}" data-campo="filial" aria-label="Filial de ${esc(p.email)}">${opts(p.filial)}</select>`}</td><td>${p.admin ? "Administrador" : `<select data-user="${esc(p.user_id)}" data-campo="papel" aria-label="Papel de ${esc(p.email)}">${papelOpts(p.papel)}</select>`}</td><td>${esc(li ? dthr(li.em) : "—")}</td><td class="num">${totImp(p.user_id)}</td></tr>`; }).join("")}</tbody></table></div>`;
   } else if (!visNotes.length){
@@ -796,12 +844,17 @@ function card(a, readOnly){
     : `<li><span class="step ${s.key ? "key" : ""}"><small>${esc(s.label)}</small><b>NF ${s.num}</b><small>${s.date ? dt(s.date) : esc(s.note || "")}</small></span></li>`).join("");
   const amounts = (a.amounts || []).map(([l, v]) => `<div><span>${esc(l)}:</span> <b>R$ ${fmt(v)}</b></div>`).join("") +
     (a.diff ? `<div class="diff">Diferença: R$ ${fmt(Math.abs(a.diff))}</div>` : "");
-  const ctl = readOnly ? `<span class="tag">${a.feito ? "Baixado por Cuiabá" : "Pendente"}</span>` : `<button data-acao="${esc(a.id)}" data-fil="${esc(a.fil)}" data-st="${a.feito ? "pendente" : "feito"}">${a.feito ? "Reabrir" : "Marcar como feito"}</button>`;
+  const st = ACOES[safeId(a.id)] || {};
+  const sol = SOLIC.filter(x => x.alerta_id === safeId(a.id)).sort((x, y) => x.id - y.id).pop();
+  const pedida = (sol && sol.status === "pendente") || (!sol && st.status === "email");
+  const mailBtn = !readOnly && !a.feito && a.cat === "baixar" && a.mail ? `<button class="primary btn-mail" data-mail="${esc(a.id)}">✉ ${pedida ? "Pedir de novo" : "Pedir baixa"}</button>` : "";
+  const ctl = readOnly ? `<span class="tag">${a.feito ? "Baixado por Cuiabá" : pedida ? "Baixa pedida" : "Pendente"}</span>` : `<div class="ctls">${pedida ? `<span class="tag pedida">Baixa pedida em ${esc(dt(((sol && sol.solicitado_em) || st.em || "").slice(0, 10)))}</span>` : ""}${sol && sol.status === "problema" ? `<span class="tag problema">Baixa com problema</span>` : ""}${mailBtn}<button data-acao="${esc(a.id)}" data-fil="${esc(a.fil)}" data-st="${a.feito ? "pendente" : "feito"}">${a.feito ? "Reabrir" : "Marcar como feito"}</button></div>`;
   return `<article class="alert ${a.feito ? "feito" : a.cat}">
     <div class="ahead"><div><h3>${esc(a.tipo)}</h3><div class="meta">${esc(a.fil)}, ${esc(a.parc)}</div></div>${ctl}</div>
     <ol class="chain">${steps}</ol>
     <p class="action">${esc(a.action)}</p>
     ${a.extra ? `<p class="extra">${esc(a.extra)}</p>` : ""}
+    ${sol && sol.status !== "pendente" ? `<p class="resp ${sol.status}">${sol.status === "confirmada" ? "✓ Baixa confirmada" : "⚠ Baixa não feita"} por ${esc(sol.respondido_email || "")} em ${esc(dt((sol.respondido_em || "").slice(0, 10)))}${sol.observacao ? ": " + esc(sol.observacao) : ""}</p>` : ""}
     <div class="amounts">${amounts}</div>
   </article>`;
 }
@@ -818,9 +871,18 @@ const podeEditarGar = g => !!PERFIL && (PERFIL.admin || (!!PERFIL.filial && (!g 
 
 function render(){
   if (secao === "cadastros" && !(PERFIL && PERFIL.admin)) secao = "garantias";
+  if (ROLE === "baixas") secao = "baixas";
+  if (secao === "baixas" && !(ROLE === "admin" || ROLE === "baixas")) secao = "garantias";
   const g = secao === "garantias";
-  $("secGar").hidden = !g; $("secNotas").hidden = secao !== "notas"; $("secCad").hidden = secao !== "cadastros";
-  if (PERFIL){ $("navCad").hidden = !PERFIL.admin; $("grpCad").hidden = !PERFIL.admin; }
+  $("secGar").hidden = !g; $("secNotas").hidden = secao !== "notas"; $("secCad").hidden = secao !== "cadastros"; $("secBaixas").hidden = secao !== "baixas";
+  if (PERFIL){
+    $("navCad").hidden = !PERFIL.admin; $("grpCad").hidden = !PERFIL.admin;
+    $("navBaixas").hidden = !(ROLE === "admin" || ROLE === "baixas");
+    const soBaixas = ROLE === "baixas";
+    $("navGar").hidden = soBaixas; $("grpGar").hidden = soBaixas; $("navNotas").hidden = soBaixas;
+    const pend = SOLIC.filter(x => x.status === "pendente").length; $("navBaixasN").textContent = pend ? pend : "";
+  }
+  if (secao === "baixas"){ document.querySelectorAll("#secnav [data-sec]").forEach(b => b.setAttribute("aria-current", b.dataset.sec === secao ? "page" : "false")); renderBaixas(); return; }
   if (secao === "cadastros"){ document.querySelectorAll("#secnav [data-sec]").forEach(b => b.setAttribute("aria-current", b.dataset.sec === secao ? "page" : "false")); renderCad(); if (CAD.pecas === null) contarCadastros(); return; }
   document.querySelectorAll("#secnav [data-sec]").forEach(b => b.setAttribute("aria-current", b.dataset.sec === secao ? "page" : "false"));
   if (g) renderGar(); else renderNotas();
@@ -1203,7 +1265,109 @@ async function importarCadastro(file, tipo){
 }
 
 $("tabs").addEventListener("click", e => { const b = e.target.closest("[data-tab]"); if (b){ tab = b.dataset.tab; render(); } });
-$("view").addEventListener("click", e => { const b = e.target.closest("[data-acao]"); if (b) setAcao(b.dataset.acao, b.dataset.st, b.dataset.fil); });
+$("view").addEventListener("click", e => {
+  const m = e.target.closest("[data-mail]"); if (m){ abrirMail(ALERTAS.get(m.dataset.mail)); return; }
+  const b = e.target.closest("[data-acao]"); if (b) setAcao(b.dataset.acao, b.dataset.st, b.dataset.fil);
+});
+
+/* ---------- baixas solicitadas: conferência pela responsável ---------- */
+let bxTab = "pendente";
+async function carregarSolic(){ try { SOLIC = await fetchAll("solicitacoes_baixa", "*", "id"); } catch(e){} render(); }
+function renderBaixas(){
+  const el = $("secBaixas"), pode = ROLE === "admin" || ROLE === "baixas";
+  const cont = k => SOLIC.filter(x => x.status === k).length;
+  const abas = [["pendente", "Pendentes"], ["confirmada", "Confirmadas"], ["problema", "Com problema"]];
+  const list = SOLIC.filter(x => x.status === bxTab).sort((a, b) => bxTab === "pendente" ? a.id - b.id : b.id - a.id);
+  el.innerHTML = `<header class="top"><div><h1>Baixas solicitadas</h1><p class="kicker">Conferência e confirmação das baixas</p>
+    <p class="sub">Cada pedido de baixa enviado por e-mail fica registrado aqui. Confira no Movere, confirme a baixa (ou informe o problema) e escreva uma observação. Ao confirmar, o site abre a resposta por e-mail para quem pediu, para o registro continuar também no e-mail.</p></div>
+    <button type="button" id="bxAtualizar">Atualizar</button></header>
+  <nav class="tabs" role="tablist">${abas.map(([k, l]) => `<button role="tab" aria-selected="${bxTab === k}" data-bx="${k}">${l}<span class="n">${cont(k)}</span></button>`).join("")}</nav>
+  ${list.length ? `<div class="list">${list.map(x => `<article class="alert ${x.status === "pendente" ? "aguardando" : x.status === "confirmada" ? "baixar" : "cobrar"}">
+    <div class="ahead"><div><h3>${esc(x.assunto)}</h3><div class="meta">${esc(x.filial || "")} · pedido por ${esc(x.solicitante_email || "")} em ${esc(dthr(x.solicitado_em))}${x.para ? " · para " + esc(x.para) : ""}</div></div>
+    ${x.status !== "pendente" ? `<span class="tag ${x.status === "confirmada" ? "ok" : "problema"}">${x.status === "confirmada" ? "Confirmada" : "Com problema"} em ${esc(dthr(x.respondido_em))}</span>` : ""}</div>
+    <pre class="bxcorpo">${esc(x.corpo)}</pre>
+    ${x.status !== "pendente" ? `<p class="resp ${x.status}">${x.status === "confirmada" ? "✓ Baixa confirmada" : "⚠ Baixa não feita"} por ${esc(x.respondido_email || "")}${x.observacao ? ": " + esc(x.observacao) : ""}</p>` : ""}
+    ${pode ? `<label class="bxobs">Observação${x.status === "pendente" ? "" : " (para corrigir a resposta)"}<textarea id="bxobs-${x.id}" rows="2" placeholder="Ex.: títulos baixados parcialmente; saldo de R$ 2.656,85 segue em aberto">${esc(x.observacao || "")}</textarea></label>
+    <div class="ctls" style="justify-content:flex-start;margin-top:10px"><button class="primary" data-resp="${x.id}" data-st="confirmada">✓ Confirmar baixa</button><button data-resp="${x.id}" data-st="problema">⚠ Não foi possível</button></div>` : ""}
+  </article>`).join("")}</div>` : `<div class="empty">${bxTab === "pendente" ? "Nenhuma baixa esperando conferência." : "Nada por aqui ainda."}</div>`}`;
+  el.querySelectorAll("[data-bx]").forEach(b => b.onclick = () => { bxTab = b.dataset.bx; renderBaixas(); });
+  $("bxAtualizar").onclick = () => carregar();
+}
+$("secBaixas").addEventListener("click", async e => {
+  const b = e.target.closest("[data-resp]"); if (!b) return;
+  const x = SOLIC.find(s => s.id === +b.dataset.resp); if (!x) return;
+  const status = b.dataset.st, obs = ($("bxobs-" + x.id).value || "").trim();
+  if (status === "problema" && !obs){ alert("Escreva na observação o que impediu a baixa."); return; }
+  const em = new Date().toISOString();
+  const { error } = await sb.from("solicitacoes_baixa").update({ status, observacao: obs || null, respondido_por: USER.id, respondido_email: PERFIL.email, respondido_em: em }).eq("id", x.id);
+  if (error){ alert("Não foi possível salvar: " + error.message); return; }
+  if (status === "confirmada"){ await sb.from("acoes").upsert({ id: x.alerta_id, filial: x.filial, status: "feito", em, por: USER.id }); ACOES[x.alerta_id] = { status: "feito", em }; }
+  Object.assign(x, { status, observacao: obs || null, respondido_email: PERFIL.email, respondido_em: em });
+  render();
+  // Resposta por e-mail para quem pediu, conferida antes de abrir
+  const h = new Date().getHours(), saud = h < 12 ? "Bom dia." : h < 18 ? "Boa tarde." : "Boa noite.";
+  const parcial = /parcial/i.test(x.assunto);
+  const f = $("formMail");
+  f.elements.para.value = x.solicitante_email || "";
+  f.elements.cc.value = [x.para, x.cc].filter(Boolean).filter(v => v !== PERFIL.email).join(", ");
+  f.elements.assunto.value = "RE: " + x.assunto;
+  f.elements.corpo.value = status === "confirmada"
+    ? `${saud}\nTítulos baixados${parcial ? " parcialmente" : ""}.${obs ? "\n\nObservação: " + obs : ""}\n\nAtenciosamente,\n${PERFIL.email}`
+    : `${saud}\nNão foi possível fazer a baixa solicitada.\n\nMotivo: ${obs}\n\nAtenciosamente,\n${PERFIL.email}`;
+  MAIL_MODO = "resposta"; MAIL_ALERTA = null;
+  $("mailTitulo").textContent = "Responder por e-mail";
+  $("mailResumo").textContent = x.assunto;
+  $("mailMsg").textContent = status === "confirmada" ? "Baixa registrada no painel. Confira a resposta e abra no e-mail." : "Problema registrado no painel. Confira a resposta e abra no e-mail.";
+  $("dlgMail").showModal();
+});
+/* ---------- pedido de baixa por e-mail ---------- */
+let MAIL_ALERTA = null, MAIL_MODO = "pedido";
+const nomeCurto = s => { const t = norm(s); if (/PHINIA|DELPHI/.test(t)) return "DELPHI"; return t.replace(/\b(LTDA|EIRELI|ME|EPP|S\/?A|COMERCIO|COM\.?|DE|DA|DO|E)\b\.?/g, " ").replace(/[^A-Z0-9 &.-]/g, " ").trim().split(/\s+/).slice(0, 2).join(" ") || "FORNECEDOR"; };
+function textoMail(a){
+  const m = a.mail, parc = m.parc === "DEVOLUÇÃO" ? "DEVOLUÇÃO" : nomeCurto(m.parc), h = new Date().getHours();
+  const saud = h < 12 ? "Bom dia." : h < 18 ? "Boa tarde." : "Boa noite.";
+  const assunto = `Baixa de Garantia${m.parcial ? " Parcial" : ""} ${parc} - ${m.pagar}`;
+  const corpo = `${saud}\nFavor baixar as notas${m.parcial ? " parcialmente" : ""} das garantias abaixo:\n\n${m.pagar} - ${parc} R$ ${fmt(m.valor)}\n${m.receber.map(r => r + " - BEUX").join("\n")}\n\nAtenciosamente,\n${PERFIL.email}`;
+  return { assunto, corpo };
+}
+function abrirMail(a){
+  if (!a || !a.mail) return;
+  MAIL_ALERTA = a; MAIL_MODO = "pedido";
+  $("mailTitulo").textContent = "Pedir baixa por e-mail";
+  const f = $("formMail"), { assunto, corpo } = textoMail(a);
+  f.elements.para.value = "devolucao@beux.com.br";
+  let cc = ""; try { cc = localStorage.getItem("garantias-cc") || ""; } catch(e){}
+  f.elements.cc.value = cc;
+  f.elements.assunto.value = assunto;
+  f.elements.corpo.value = corpo;
+  $("mailResumo").textContent = `${a.tipo} · ${a.fil}, ${a.parc}`;
+  $("mailMsg").textContent = "";
+  $("dlgMail").showModal();
+}
+$("mailCancelar").addEventListener("click", () => $("dlgMail").close());
+$("mailCopiar").addEventListener("click", async () => {
+  const f = $("formMail");
+  try { await navigator.clipboard.writeText(`Para: ${f.elements.para.value}\nAssunto: ${f.elements.assunto.value}\n\n${f.elements.corpo.value}`); $("mailMsg").textContent = "Texto copiado. É só colar no e-mail."; }
+  catch(e){ $("mailMsg").textContent = "Não foi possível copiar automaticamente: selecione o texto e use Ctrl+C."; }
+});
+$("formMail").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = e.target, para = f.elements.para.value.trim(), cc = f.elements.cc.value.trim();
+  if (!para){ $("mailMsg").textContent = "Informe o destinatário."; return; }
+  try { localStorage.setItem("garantias-cc", cc); } catch(err){}
+  const q = [cc ? "cc=" + encodeURIComponent(cc) : "", "subject=" + encodeURIComponent(f.elements.assunto.value), "body=" + encodeURIComponent(f.elements.corpo.value)].filter(Boolean).join("&");
+  window.location.href = "mailto:" + para.split(/[;,]\s*/).map(encodeURIComponent).join(",") + "?" + q;
+  $("dlgMail").close();
+  if (MAIL_MODO === "pedido" && MAIL_ALERTA && ROLE === "admin"){
+    const id = safeId(MAIL_ALERTA.id), em = new Date().toISOString();
+    const { error } = await sb.from("acoes").upsert({ id, filial: MAIL_ALERTA.fil || null, status: "email", em, por: USER.id });
+    if (!error) ACOES[id] = { status: "email", em };
+    const row = { alerta_id: id, filial: MAIL_ALERTA.fil || null, para, cc: cc || null, assunto: f.elements.assunto.value, corpo: f.elements.corpo.value, solicitante: USER.id, solicitante_email: PERFIL.email };
+    const r2 = await sb.from("solicitacoes_baixa").insert(row);
+    if (r2.error) setStatus("O e-mail abriu, mas a solicitação não foi registrada no painel: " + r2.error.message, "err");
+    else { await carregarSolic(); setStatus("E-mail aberto no seu programa de e-mail. Confira e envie por lá. A solicitação ficou registrada em Baixas solicitadas.", "ok"); }
+  } else if (MAIL_MODO === "resposta") setStatus("Resposta aberta no seu programa de e-mail. Confira e envie por lá.", "ok");
+});
 $("view").addEventListener("change", e => { const s = e.target.closest("select[data-user]"); if (s && ROLE === "admin") setPerfilUsuario(s.dataset.user, s.dataset.campo, s.value); });
 $("export").addEventListener("click", () => { try { exportar(); } catch(err){ setStatus("Erro ao gerar o Excel: " + err.message, "err"); } });
 const drop = $("drop"), input = $("file");
