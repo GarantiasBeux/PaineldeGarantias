@@ -201,6 +201,15 @@ dialog#dlgMail::backdrop{background:rgba(12,20,36,.55)}
 .bxcorpo{white-space:pre-wrap;font:inherit;font-size:14px;background:var(--surface-2);border-radius:12px;padding:12px 14px;margin:12px 0 0}
 .bxobs{display:flex;flex-direction:column;gap:6px;margin-top:12px;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .bxobs textarea{font:inherit;font-size:14px;font-weight:500;text-transform:none;letter-spacing:0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);resize:vertical}
+
+.laudos{grid-column:1/-1;display:flex;flex-direction:column;gap:8px}
+.laudo{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2);color:#b4232a}
+.laudo .ln{flex:1;min-width:0;color:var(--ink)} .laudo .ln b{display:block;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .laudo .ln small{font-size:12px;color:var(--muted)}
+.laudo.novo{border-style:dashed;background:#f7f7ff} .laudo.vazio{color:var(--muted);font-size:13.5px}
+.laudo button{padding:7px 12px;font-size:13px}
+.ghostrm{background:none;border:none;color:var(--bad);font-weight:600}
+.laudobtn{position:relative;color:#b4232a;width:auto;padding:0 10px;display:flex;gap:4px;align-items:center}
+.laudobtn small{font-size:12px;font-weight:700}
 /* formulário da garantia */
 dialog#dlgGar{border:none;border-radius:28px;background:var(--surface);color:var(--ink);padding:0;width:min(1000px,96vw);max-height:94vh;box-shadow:0 30px 80px rgba(15,23,42,.25)}
 dialog#dlgGar::backdrop{background:rgba(12,20,36,.55);backdrop-filter:blur(2px)}
@@ -341,6 +350,10 @@ dialog#dlgGar::backdrop{background:rgba(12,20,36,.55);backdrop-filter:blur(2px)}
       <label>CNPJ<span class="acbox"><input name="cnpj"></span></label>
       <label class="span2">Razão social / fantasia *<span class="acbox"><input name="cliente" required placeholder="Ex.: 40029, Adolfo ou 34.151.188"></span><em>Busca pelo código, nome ou CNPJ</em></label>
       <label class="full">Defeito apresentado pelo cliente<textarea name="defeito"></textarea></label>
+    </fieldset>
+    <fieldset><legend>Laudos (PDF)</legend>
+      <div class="laudos" id="garLaudos"></div>
+      <div class="itensfoot" id="garLaudoFoot"><label class="additem btnfile">+ Anexar laudo em PDF<input type="file" id="garLaudoFile" accept="application/pdf,.pdf" multiple hidden></label><em>Pode anexar mais de um. Até 20 MB por arquivo.</em></div>
     </fieldset>
     <fieldset><legend>Indústria</legend>
       <label class="span2">Parecer final<select name="parecer_final"></select></label>
@@ -989,7 +1002,7 @@ function renderGar(){
       <td class="gt-fil">${esc(FIL_CURTO[g.filial] || g.filial)}</td>
       <td><b>NF ${esc(g.nf_cliente || "S/N")}</b><span class="gt-sm">ANTECIPADO: ${g.pgto_antecipado ? "SIM" : "NÃO"}${g.nf_60dias ? " · NF 60 DIAS" + (g.nf_60dias_numero ? " " + esc(g.nf_60dias_numero) : "") : ""}</span></td>
       <td><div class="parecer ${pc}"><i></i><div><b>${esc(p1)}</b>${p2 ? `<span class="gt-sm">${esc(p2)}</span>` : ""}</div></div></td>
-      <td><div class="rowacts">${pode ? `<button type="button" class="icbtn" data-edit="${g.id}" title="Editar" aria-label="Editar garantia #${g.id}">${ICO.lapis}</button>` : ""}${fim || !pode ? `<button type="button" class="btn-ver" data-edit="${g.id}">Ver detalhes</button>` : `<button type="button" class="primary btn-analisar" data-edit="${g.id}">Analisar</button>`}</div></td></tr>
+      <td><div class="rowacts">${(g.laudos || []).length ? `<button type="button" class="icbtn laudobtn" data-laudo="${g.id}" title="${esc((g.laudos || []).map(l => l.nome).join("\n"))}" aria-label="Laudos da garantia #${g.id}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><small>${g.laudos.length}</small></button>` : ""}${pode ? `<button type="button" class="icbtn" data-edit="${g.id}" title="Editar" aria-label="Editar garantia #${g.id}">${ICO.lapis}</button>` : ""}${fim || !pode ? `<button type="button" class="btn-ver" data-edit="${g.id}">Ver detalhes</button>` : `<button type="button" class="primary btn-analisar" data-edit="${g.id}">Analisar</button>`}</div></td></tr>
       <tr class="vrow"><td colspan="8"><span class="vlabel">Corrente</span>${chipsVinc(g, v)}</td></tr>`;
   }).join("")}</tbody></table></div>` : `<div class="empty">${GAR.length ? "Nenhuma garantia com esses filtros." : "Nenhuma garantia cadastrada ainda. Clique em “+ Nova garantia” para começar."}</div>`}`;
   const bind = (id, key, ev = "change") => { const x = $(id); if (x) x.addEventListener(ev, e => { gf[key] = e.target.value; renderGar(); if (ev === "input"){ const y = $(id); y.focus(); y.setSelectionRange(y.value.length, y.value.length); } }); };
@@ -999,6 +1012,8 @@ function renderGar(){
   const im = $("garImport"); if (im) im.onchange = () => { if (im.files[0]) importarPlanilhaGar(im.files[0]); im.value = ""; };
 }
 $("secGar").addEventListener("click", async e => {
+  const lb = e.target.closest("[data-laudo]");
+  if (lb){ const g = GAR.find(x => x.id === +lb.dataset.laudo); if (g && g.laudos.length === 1) baixarLaudo(g.laudos[0].path, g.laudos[0].nome); else if (g) abrirGar(g); return; }
   const ed = e.target.closest("[data-edit]"); if (ed){ abrirGar(GAR.find(g => g.id === +ed.dataset.edit)); return; }
   const cf = e.target.closest("[data-confirma]");
   if (cf){
@@ -1048,6 +1063,37 @@ function lerItens(){
 }
 $("garAddItem").addEventListener("click", () => { const r = addItem(null, true); r.querySelector('[data-k="produto"]').focus(); });
 
+/* laudos em PDF */
+let LAUDOS = { atuais: [], novos: [], remover: [], pode: false };
+const tamanho = b => b > 1048576 ? (b / 1048576).toFixed(1).replace(".", ",") + " MB" : Math.max(1, Math.round(b / 1024)) + " KB";
+function desenharLaudos(){
+  const el = $("garLaudos"), vis = LAUDOS.atuais.filter(l => !LAUDOS.remover.includes(l.path));
+  el.innerHTML = (vis.map(l => `<div class="laudo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><div class="ln"><b>${esc(l.nome)}</b><small>${tamanho(l.tamanho || 0)} · ${esc(dthr(l.enviado_em))}${l.enviado_por ? " · " + esc(l.enviado_por) : ""}</small></div>
+      <button type="button" data-baixar="${esc(l.path)}" data-nome="${esc(l.nome)}">Baixar PDF</button>${LAUDOS.pode ? `<button type="button" class="ghostrm" data-remover="${esc(l.path)}">Remover</button>` : ""}</div>`).join("") +
+    LAUDOS.novos.map((f, i) => `<div class="laudo novo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg><div class="ln"><b>${esc(f.name)}</b><small>${tamanho(f.size)} · sobe ao salvar</small></div><button type="button" class="ghostrm" data-tirar="${i}">Tirar</button></div>`).join("")) ||
+    `<div class="laudo vazio">Nenhum laudo anexado.</div>`;
+}
+async function baixarLaudo(path, nome){
+  const { data, error } = await sb.storage.from("laudos").createSignedUrl(path, 120, { download: nome || true });
+  if (error){ alert("Não foi possível baixar o laudo: " + error.message); return; }
+  const a = document.createElement("a"); a.href = data.signedUrl; a.target = "_blank"; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove();
+}
+$("garLaudoFile").addEventListener("change", e => {
+  const fora = [];
+  for (const f of e.target.files){
+    if (!/\.pdf$/i.test(f.name) && f.type !== "application/pdf"){ fora.push(f.name + " (não é PDF)"); continue; }
+    if (f.size > 20971520){ fora.push(f.name + " (maior que 20 MB)"); continue; }
+    LAUDOS.novos.push(f);
+  }
+  e.target.value = ""; desenharLaudos();
+  $("garMsg").textContent = fora.length ? "Não anexados: " + fora.join("; ") : "Laudo pronto para subir ao salvar.";
+});
+$("garLaudos").addEventListener("click", e => {
+  const b = e.target.closest("[data-baixar]"); if (b){ baixarLaudo(b.dataset.baixar, b.dataset.nome); return; }
+  const r = e.target.closest("[data-remover]"); if (r){ if (confirm("Remover este laudo ao salvar?")){ LAUDOS.remover.push(r.dataset.remover); desenharLaudos(); } return; }
+  const t = e.target.closest("[data-tirar]"); if (t){ LAUDOS.novos.splice(+t.dataset.tirar, 1); desenharLaudos(); }
+});
+
 function abrirGar(g){
   const d = $("dlgGar"), f = $("formGar");
   const novo = !g, pode = podeEditarGar(g);
@@ -1067,6 +1113,8 @@ function abrirGar(g){
   filSel.disabled = !PERFIL.admin;
   [...f.elements].forEach(el => { if (el.name) el.disabled = !pode || (el.name === "filial" && !PERFIL.admin); });
   $("garItens").innerHTML = ""; itensDe(g).forEach(it => addItem(it, pode)); $("garAddItem").hidden = !pode;
+  LAUDOS = { atuais: Array.isArray(g.laudos) ? g.laudos.slice() : [], novos: [], remover: [], pode };
+  $("garLaudoFoot").hidden = !pode; desenharLaudos();
   $("garSalvar").hidden = !pode;
   $("garApagar").hidden = !(PERFIL.admin && !novo);
   f.dataset.id = novo ? "" : g.id;
@@ -1105,15 +1153,34 @@ $("formGar").addEventListener("submit", async e => {
   Object.assign(row, { itens, produto: itens[0].produto, cod_movere: itens[0].cod_movere, cod_peca: itens[0].cod_peca, quantidade: itens[0].quantidade });
   $("garMsg").textContent = "Salvando…";
   const id = f.dataset.id;
-  const { error } = id ? await sb.from("garantias").update(row).eq("id", +id) : await sb.from("garantias").insert({ ...row, criado_por: USER.id });
+  let gid = id ? +id : null, error;
+  if (id) ({ error } = await sb.from("garantias").update(row).eq("id", gid));
+  else { const r = await sb.from("garantias").insert({ ...row, criado_por: USER.id }).select("id").single(); error = r.error; if (r.data) gid = r.data.id; }
   if (error){ $("garMsg").textContent = "Não foi possível salvar: " + error.message; return; }
+  if (LAUDOS.novos.length || LAUDOS.remover.length){
+    const lista = LAUDOS.atuais.filter(l => !LAUDOS.remover.includes(l.path));
+    const limpo = n => n.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^A-Za-z0-9._-]+/g, "_").slice(-80);
+    for (let i = 0; i < LAUDOS.novos.length; i++){
+      const f2 = LAUDOS.novos[i];
+      $("garMsg").textContent = `Enviando laudo ${i + 1} de ${LAUDOS.novos.length}…`;
+      const path = `${row.filial}/${gid}/${Date.now()}-${limpo(f2.name)}`;
+      const up = await sb.storage.from("laudos").upload(path, f2, { contentType: "application/pdf", upsert: false });
+      if (up.error){ $("garMsg").textContent = `A garantia foi salva, mas o laudo “${f2.name}” não subiu: ${up.error.message}`; await sb.from("garantias").update({ laudos: lista }).eq("id", gid); await carregarGar(); return; }
+      lista.push({ path, nome: f2.name, tamanho: f2.size, enviado_em: new Date().toISOString(), enviado_por: PERFIL.email });
+    }
+    if (LAUDOS.remover.length) await sb.storage.from("laudos").remove(LAUDOS.remover);
+    const r3 = await sb.from("garantias").update({ laudos: lista }).eq("id", gid);
+    if (r3.error){ $("garMsg").textContent = "Os arquivos subiram, mas a lista de laudos não foi salva: " + r3.error.message; return; }
+  }
   $("dlgGar").close();
   await carregarGar();
 });
 $("garApagar").addEventListener("click", async () => {
   const id = $("formGar").dataset.id;
   if (!id || !confirm(`Apagar a garantia #${String(id).padStart(3, "0")}? Não dá para desfazer.`)) return;
+  const gApagar = GAR.find(g => g.id === +id);
   const { error } = await sb.from("garantias").delete().eq("id", +id);
+  if (!error && gApagar && (gApagar.laudos || []).length) await sb.storage.from("laudos").remove(gApagar.laudos.map(l => l.path));
   if (error){ $("garMsg").textContent = "Não foi possível apagar: " + error.message; return; }
   $("dlgGar").close(); await carregarGar();
 });
