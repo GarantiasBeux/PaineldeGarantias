@@ -211,6 +211,35 @@ dialog#dlgMail::backdrop{background:rgba(12,20,36,.55)}
 .laudobtn{position:relative;color:#b4232a;width:auto;padding:0 10px;display:flex;gap:4px;align-items:center}
 .laudobtn small{font-size:12px;font-weight:700}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:50;max-width:min(720px,92vw);background:var(--side);color:#fff;padding:12px 20px;border-radius:14px;box-shadow:0 14px 40px rgba(15,23,42,.3);font-weight:500}
+
+/* tabelas da seção Notas e baixas também cabem na tela */
+#view table{table-layout:fixed;width:100%}
+#view th{white-space:normal;line-height:1.25}
+#view td{overflow-wrap:anywhere}
+#view td.obs{max-width:none;font-size:12.5px}
+/* tabela das garantias cabe na tela, sem rolar para o lado */
+table.gtab{table-layout:fixed;width:100%}
+table.gtab th{white-space:normal;line-height:1.25;padding-left:10px;padding-right:10px}
+table.gtab td{padding:14px 10px;overflow:hidden}
+table.gtab th:first-child,table.gtab td:first-child{padding-left:18px}
+table.gtab th:last-child,table.gtab td:last-child{padding-right:14px}
+table.gtab .gt-main{max-width:100%;font-size:13px}
+table.gtab .gt-sm{white-space:normal;overflow-wrap:anywhere}
+table.gtab .parecer b{max-width:none;font-size:11.5px;overflow-wrap:anywhere}
+table.gtab .st{font-size:10.5px;padding:3px 9px;white-space:normal;text-align:center;line-height:1.2}
+table.gtab .rowacts{flex-wrap:wrap;gap:6px}
+table.gtab .icbtn{width:34px;height:34px;border-radius:10px}
+table.gtab .laudobtn{width:auto;padding:0 8px}
+table.gtab .btn-analisar,table.gtab .btn-ver{padding:7px 12px;font-size:11px}
+table.gtab tr.vrow td{padding:0 14px 14px 18px;overflow:visible;white-space:normal}
+table.gtab .vchip,table.gtab .pchip{white-space:normal}
+.gt-fil{white-space:normal}
+@media (max-width:1250px){
+  table.gtab col.c-fil{width:0} table.gtab td:nth-child(5),table.gtab th:nth-child(5){display:none}
+}
+@media (max-width:1000px){
+  table.gtab col.c-par{width:0} table.gtab tr.grow td:nth-child(7),table.gtab th:nth-child(7){display:none}
+}
 /* formulário da garantia */
 dialog#dlgGar{border:none;border-radius:28px;background:var(--surface);color:var(--ink);padding:0;width:min(1000px,96vw);max-height:94vh;box-shadow:0 30px 80px rgba(15,23,42,.25)}
 dialog#dlgGar::backdrop{background:rgba(12,20,36,.55);backdrop-filter:blur(2px)}
@@ -1065,7 +1094,7 @@ function renderGar(){
     <label>Data inicial<input type="date" id="fDi" value="${esc(gf.di)}"></label>
     <label>Data final<input type="date" id="fDf" value="${esc(gf.df)}"></label>
   </div>
-  ${list.length ? `<div class="tablewrap"><table class="gtab"><thead><tr><th>#ID / Data</th><th>Status</th><th>Produto</th><th>Cliente / Fantasia</th><th>Filial</th><th>NF original</th><th>Parecer final</th><th style="text-align:right">Ações</th></tr></thead><tbody>${list.map(g => {
+  ${list.length ? `<div class="tablewrap"><table class="gtab"><colgroup><col style="width:8%"><col style="width:9%"><col style="width:25%"><col style="width:19%"><col class="c-fil" style="width:7%"><col style="width:11%"><col class="c-par" style="width:11%"><col style="width:10%"></colgroup><thead><tr><th>#ID / Data</th><th>Status</th><th>Produto</th><th>Cliente / Fantasia</th><th>Filial</th><th>NF original</th><th>Parecer final</th><th style="text-align:right">Ações</th></tr></thead><tbody>${list.map(g => {
     const v = vinculos(g, notes), [p1, p2, pc] = parecerTxt(g), fim = g.status === "Procedente" || g.status === "Improcedente";
     const pode = podeEditarGar(g);
     return `<tr class="grow">
