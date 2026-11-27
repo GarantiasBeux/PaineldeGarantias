@@ -920,7 +920,9 @@ $("secnav").addEventListener("click", e => { const b = e.target.closest("[data-s
 
 /* números de série / códigos das peças: tokens com letras e números, de 6 a 14 caracteres */
 const SER_RE = /(?<![A-Z0-9])(?=[A-Z0-9]*\d)(?=[A-Z0-9]*[A-Z])[A-Z0-9]{6,14}(?![A-Z0-9])/g;
-const tokensSer = t => new Set((norm(t).match(SER_RE)) || []);
+// formato dos injetores (2 números + 1 letra + 5 números), achado mesmo quando vem grudado em outro número (ex.: 07P417252570)
+const INJ_RE = /(?<![A-Z0-9])\d{2}[A-Z]\d{5}/g;
+const tokensSer = t => { const u = norm(t); return new Set([...(u.match(SER_RE) || []), ...(u.match(INJ_RE) || [])]); };
 function seriesGarantia(g){
   if (g._ser) return g._ser;
   const fora = tokensSer(itensDe(g).map(i => [i.produto, i.cod_peca, i.cod_movere].join(" ")).join(" "));
